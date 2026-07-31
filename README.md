@@ -99,8 +99,8 @@ El contenido multimedia del Portal se recrea con Remotion a partir de flujos ver
 
 `astro build` genera un sitio compatible con cualquier proveedor de alojamiento estático. El origen de producción está configurado como `https://camir.tech` en `astro.config.mjs`; debe actualizarse antes de desplegar una copia derivada bajo otro dominio.
 
-## Derechos
+## Marcas y atribución
 
-Copyright © 2026 Carlos Miranda. Todos los derechos reservados.
+Los nombres, logos e identidades visuales de tecnologías, productos y organizaciones pertenecen a sus respectivos titulares. Se muestran únicamente con fines identificativos y para documentar las herramientas utilizadas en los proyectos.
 
-El código fuente de este repositorio está disponible para revisión. No se concede una licencia de código abierto. El contenido personal, la marca, los CV, certificados, recursos de proyectos y marcas de terceros no pueden reutilizarse sin permiso de su titular correspondiente.
+Este portfolio no afirma propiedad sobre esos logos, marcas o tecnologías; tampoco está afiliado, patrocinado ni respaldado por sus titulares, ni presenta o comercializa tecnología de terceros como propia.
