@@ -1,4 +1,4 @@
-name: Quality
+name: Calidad
 
 on:
   push:
@@ -14,31 +14,31 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Check out repository
+      - name: Descargar repositorio
         uses: actions/checkout@v7
 
-      - name: Set up pnpm
+      - name: Configurar pnpm
         uses: pnpm/action-setup@v6
 
-      - name: Set up Node.js
+      - name: Configurar Node.js
         uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
 
-      - name: Install dependencies
+      - name: Instalar dependencias
         run: pnpm install --frozen-lockfile
 
-      - name: Install Chromium
+      - name: Instalar Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Check Astro and TypeScript
+      - name: Validar Astro y TypeScript
         run: pnpm astro check
 
-      - name: Build production site
+      - name: Construir sitio de producción
         run: pnpm build
 
-      - name: Audit site in Chromium
+      - name: Auditar sitio en Chromium
         run: |
           trap 'pnpm astro dev stop' EXIT
           pnpm astro dev --background

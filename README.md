@@ -1,45 +1,45 @@
 # camir.tech
 
-[![Quality](https://github.com/camircode/portfolio/actions/workflows/quality.yml/badge.svg)](https://github.com/camircode/portfolio/actions/workflows/quality.yml)
+[![Calidad](https://github.com/camircode/portfolio/actions/workflows/quality.yml/badge.svg)](https://github.com/camircode/portfolio/actions/workflows/quality.yml)
 
-A bilingual systems portfolio for **Carlos Miranda**, built as an interactive operations rack rather than a conventional project gallery.
+Portfolio bilingüe de sistemas de **Carlos Miranda**, construido como un rack de operaciones interactivo en lugar de una galería convencional de proyectos.
 
-[GitHub profile](https://github.com/camircode) · [2 Free](https://github.com/camircode/2free)
+[Visitar camir.tech](https://camir.tech) · [Versión en inglés](https://camir.tech/en/) · [Perfil de GitHub](https://github.com/camircode) · [2 Free](https://github.com/camircode/2free)
 
-![camir.tech portfolio preview](public/assets/og/portfolio.png)
+![Vista previa del portfolio camir.tech](public/assets/og/portfolio.png)
 
-## What It Demonstrates
+## Qué demuestra
 
-- An immersive, guided home experience with real, indexable routes behind every module.
-- Spanish-first content with equivalent English routes under `/en/`.
-- Detailed system maps for FER&REN Portal and the open-source [2 Free](https://github.com/camircode/2free) platform.
-- Dedicated articles for every project area and technology instead of a client-side-only gallery.
-- Static-first Astro pages enhanced with GSAP, Three.js, Remotion media, and Astro View Transitions.
-- Progressive enhancement, reduced-motion support, keyboard access, structured data, and sitemap generation.
+- Una experiencia inicial inmersiva y guiada, con rutas reales e indexables detrás de cada módulo.
+- Contenido canónico en español con rutas equivalentes en inglés bajo `/en/`.
+- Mapas detallados de FER&REN Portal y de la plataforma de código abierto [2 Free](https://github.com/camircode/2free).
+- Artículos dedicados para cada área de proyecto y tecnología, en lugar de una galería limitada al cliente.
+- Páginas Astro estáticas primero, mejoradas con GSAP, Three.js, contenido Remotion y transiciones de vista de Astro.
+- Mejora progresiva, soporte para movimiento reducido, acceso por teclado, datos estructurados y generación de sitemap.
 
-## Architecture
+## Arquitectura
 
-| Layer | Responsibility |
+| Capa | Responsabilidad |
 | --- | --- |
-| `src/data/` | Shared typed content for both languages, projects, modules, technologies, and case-study narratives. |
-| `src/pages/` | Spanish canonical routes and their English equivalents. |
-| `src/components/` | The immersive rack, project maps, article surfaces, navigation rails, and media evidence. |
-| `src/scripts/` | Progressive Three.js module artifacts. |
-| `video/` | Remotion compositions for sanitized Portal workflow demonstrations. |
-| `public/assets/` | Production fonts, logos, screenshots, posters, and generated demo videos. |
-| `scripts/` | Site auditing, resume generation, and Portal demo rendering. |
+| `src/data/` | Contenido tipado compartido entre ambos idiomas: proyectos, módulos, tecnologías y narrativas de casos de estudio. |
+| `src/pages/` | Rutas canónicas en español y sus equivalentes en inglés. |
+| `src/components/` | Rack inmersivo, mapas de proyectos, artículos, rieles de navegación y evidencia multimedia. |
+| `src/scripts/` | Artefactos progresivos de módulos construidos con Three.js. |
+| `video/` | Composiciones Remotion para demostraciones sanitizadas de los flujos del Portal. |
+| `public/assets/` | Tipografías, logos, capturas, pósteres y videos generados para producción. |
+| `scripts/` | Auditoría del sitio, generación del CV y renderizado de demostraciones del Portal. |
 
-The site ships usable HTML first. JavaScript adds guided activation, spatial transitions, motion, and bounded 3D scenes without becoming a requirement for accessing the content.
+El sitio entrega primero HTML utilizable. JavaScript añade activación guiada, transiciones espaciales, movimiento y escenas 3D acotadas sin convertirse en un requisito para acceder al contenido.
 
-## Local Development
+## Desarrollo local
 
-### Requirements
+### Requisitos
 
-- Node.js 22.12 or newer
+- Node.js 22.12 o superior
 - pnpm 11
-- Chromium, installed through Playwright when running the browser audit
+- Chromium, instalado mediante Playwright para ejecutar la auditoría en navegador
 
-### Setup
+### Configuración
 
 ```bash
 pnpm install
@@ -47,7 +47,7 @@ cp .env.example .env
 pnpm astro dev --background
 ```
 
-The development server is available at `http://localhost:4321`.
+El servidor de desarrollo queda disponible en `http://localhost:4321`.
 
 ```bash
 pnpm astro dev status
@@ -55,25 +55,25 @@ pnpm astro dev logs
 pnpm astro dev stop
 ```
 
-### Environment
+### Entorno
 
-| Variable | Purpose |
+| Variable | Propósito |
 | --- | --- |
-| `PUBLIC_2FREE_URL` | Optional public URL for the future 2 Free landing page. The live-site action remains hidden when this value is empty. |
+| `PUBLIC_2FREE_URL` | URL pública opcional para la futura página de presentación de 2 Free. La acción para visitar el sitio permanece oculta cuando el valor está vacío. |
 
-No credentials or private infrastructure values are required to build the portfolio.
+No se requieren credenciales ni valores privados de infraestructura para construir el portfolio.
 
-## Commands
+## Comandos
 
-| Command | Purpose |
+| Comando | Propósito |
 | --- | --- |
-| `pnpm astro check` | Validate Astro and TypeScript. |
-| `pnpm build` | Generate the production site in `dist/`. |
-| `pnpm audit:site` | Audit responsive routes, interactions, media behavior, motion preferences, and internal links in Chromium. |
-| `pnpm generate:demos` | Render the sanitized Portal videos and posters with Remotion. |
-| `pnpm generate:cv` | Regenerate the public English resume files. |
+| `pnpm astro check` | Validar Astro y TypeScript. |
+| `pnpm build` | Generar el sitio de producción en `dist/`. |
+| `pnpm audit:site` | Auditar rutas adaptables, interacciones, multimedia, preferencias de movimiento y enlaces internos en Chromium. |
+| `pnpm generate:demos` | Renderizar con Remotion los videos y pósteres sanitizados del Portal. |
+| `pnpm generate:cv` | Regenerar los archivos públicos del CV en inglés. |
 
-Run the full production verification with:
+La verificación completa de producción se ejecuta con:
 
 ```bash
 pnpm astro check
@@ -83,24 +83,24 @@ pnpm audit:site
 pnpm astro dev stop
 ```
 
-## Content Model
+## Modelo de contenido
 
-Projects, project modules, and technologies live in `src/data/content.ts`. Their longer implementation narratives live in `src/data/stories.ts`. Both language versions consume the same typed records so route order, relationships, and technical claims stay aligned.
+Los proyectos, sus módulos y las tecnologías viven en `src/data/content.ts`. Las narrativas de implementación más extensas viven en `src/data/stories.ts`. Ambas versiones de idioma consumen los mismos registros tipados para mantener alineados el orden de rutas, las relaciones y las afirmaciones técnicas.
 
-When adding an item, preserve a real route in both languages and update the shared data rather than duplicating content inside page templates.
+Al añadir un elemento, se debe conservar una ruta real en ambos idiomas y actualizar los datos compartidos en lugar de duplicar contenido dentro de las plantillas de página.
 
-## Privacy Boundary
+## Límite de privacidad
 
-FER&REN Portal is a private production system. This repository does **not** contain its source code, credentials, internal URLs, customer records, employee records, financial information, or production infrastructure configuration.
+FER&REN Portal es un sistema privado en producción. Este repositorio **no** contiene su código fuente, credenciales, URLs internas, registros de clientes, datos de empleados, información financiera ni configuración de infraestructura de producción.
 
-Portal media is recreated with Remotion from verified workflows, using fictional records and no production connection. Public screenshots are limited to unauthenticated screens or sanitized demonstrations. The generated media explains the workflow but does not reproduce the complete production interface or user experience.
+El contenido multimedia del Portal se recrea con Remotion a partir de flujos verificados, con registros ficticios y sin conexión a producción. Las capturas públicas se limitan a pantallas sin autenticación o demostraciones sanitizadas. El contenido generado explica el flujo, pero no reproduce por completo la interfaz ni la experiencia de usuario del sistema en producción.
 
-## Deployment
+## Despliegue
 
-`astro build` produces a static site suitable for any static host. The reserved production origin is configured as `https://camir.tech` in `astro.config.mjs`; update it before deploying a fork under another domain.
+`astro build` genera un sitio compatible con cualquier proveedor de alojamiento estático. El origen de producción está configurado como `https://camir.tech` en `astro.config.mjs`; debe actualizarse antes de desplegar una copia derivada bajo otro dominio.
 
-## Rights
+## Derechos
 
-Copyright © 2026 Carlos Miranda. All rights reserved.
+Copyright © 2026 Carlos Miranda. Todos los derechos reservados.
 
-This repository is source-available for review. No open-source license is granted. Personal content, branding, resumes, certificates, project media, and third-party marks may not be reused without the relevant owner's permission.
+El código fuente de este repositorio está disponible para revisión. No se concede una licencia de código abierto. El contenido personal, la marca, los CV, certificados, recursos de proyectos y marcas de terceros no pueden reutilizarse sin permiso de su titular correspondiente.
