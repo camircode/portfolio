@@ -1,11 +1,10 @@
 # camir.tech
 
 [![Quality](https://github.com/camircode/portfolio/actions/workflows/quality.yml/badge.svg)](https://github.com/camircode/portfolio/actions/workflows/quality.yml)
-[![Live site](https://img.shields.io/badge/live-camir.tech-d7ff4f?style=flat-square&labelColor=101306)](https://camir.tech)
 
 A bilingual systems portfolio for **Carlos Miranda**, built as an interactive operations rack rather than a conventional project gallery.
 
-[Visit the portfolio](https://camir.tech) · [English version](https://camir.tech/en/) · [GitHub profile](https://github.com/camircode)
+[GitHub profile](https://github.com/camircode) · [2 Free](https://github.com/camircode/2free)
 
 ![camir.tech portfolio preview](public/assets/og/portfolio.png)
 
@@ -98,7 +97,7 @@ Portal media is recreated with Remotion from verified workflows, using fictional
 
 ## Deployment
 
-`astro build` produces a static site suitable for any static host. The canonical production origin is configured as `https://camir.tech` in `astro.config.mjs`; update it before deploying a fork under another domain.
+`astro build` produces a static site suitable for any static host. The reserved production origin is configured as `https://camir.tech` in `astro.config.mjs`; update it before deploying a fork under another domain.
 
 ## Rights
 
