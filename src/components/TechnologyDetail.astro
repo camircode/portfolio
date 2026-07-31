@@ -1,0 +1,185 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { projects, projectPath, type Locale, type Technology } from '@/data/content';
+import { technologyInsights } from '@/data/stories';
+
+interface Props { locale: Locale; technology: Technology }
+const { locale, technology } = Astro.props;
+const isEs = locale === 'es';
+const canonicalPath = isEs ? `/tecnologias/${technology.slug}/` : `/en/technologies/${technology.slug}/`;
+const alternatePath = isEs ? `/en/technologies/${technology.slug}/` : `/tecnologias/${technology.slug}/`;
+const relatedProjects = projects.filter((project) => technology.projects.includes(project.slug));
+const insight = technologyInsights[technology.slug];
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: `${technology.name}: ${technology.summary[locale]}`,
+  description: technology.purpose[locale],
+  author: { '@type': 'Person', name: 'Carlos Miranda' },
+  inLanguage: locale,
+};
+---
+
+<BaseLayout locale={locale} title={technology.name} description={technology.summary[locale]} canonicalPath={canonicalPath} alternatePath={alternatePath}>
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+  <article class="page-shell technology-article">
+    <header transition:name={`technology-${technology.slug}`}>
+      <div class="technology-mark"><img src={technology.logo} alt="" /></div>
+      <div>
+        <p class="kicker">{technology.category[locale]} · {isEs ? 'Tecnología en uso' : 'Technology in use'}</p>
+        <h1>{technology.name}</h1>
+        <p class="lead">{technology.summary[locale]}</p>
+      </div>
+    </header>
+
+    <section class="article-copy">
+      <aside>
+        <span>{isEs ? 'En una frase' : 'In one sentence'}</span>
+        <p>{technology.purpose[locale]}</p>
+      </aside>
+      <div>
+        <h2>{isEs ? 'Qué problema resuelve' : 'The problem it solves'}</h2>
+        <p>{technology.summary[locale]}</p>
+        <h2>{isEs ? 'Criterio técnico' : 'Technical rationale'}</h2>
+        <p>{insight[locale]}</p>
+        <h2>{isEs ? 'Cómo la he usado' : 'How I have used it'}</h2>
+        <p>{technology.usage[locale]}</p>
+      </div>
+    </section>
+
+    <section class="related-work">
+      <p class="kicker">{isEs ? 'Evidencia conectada' : 'Connected evidence'}</p>
+      <h2>{isEs ? 'Proyectos donde aparece' : 'Projects where it appears'}</h2>
+      <div>
+        {relatedProjects.map((project) => (
+          <a href={projectPath(project, locale)}>
+            <span>{project.kicker[locale]}</span>
+            <strong>{project.title}</strong>
+            <i aria-hidden="true">↗</i>
+          </a>
+        ))}
+      </div>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .technology-article > header {
+    display: grid;
+    grid-template-columns: minmax(240px, 0.45fr) 1fr;
+    align-items: center;
+    gap: clamp(34px, 9vw, 150px);
+  }
+
+  .technology-mark {
+    display: grid;
+    aspect-ratio: 1;
+    place-items: center;
+    border-radius: var(--radius);
+    background: var(--signal);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .technology-mark img {
+    width: 48%;
+    max-height: 48%;
+    object-fit: contain;
+  }
+
+  .technology-article h1 {
+    margin: 12px 0 24px;
+    font-family: var(--display);
+    font-size: clamp(4rem, 10vw, 7rem);
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    line-height: 0.85;
+  }
+
+  .article-copy {
+    display: grid;
+    grid-template-columns: 0.45fr 1fr;
+    gap: clamp(40px, 9vw, 150px);
+    padding: clamp(90px, 14vw, 180px) 0;
+  }
+
+  .article-copy aside {
+    align-self: start;
+    padding: 24px;
+    border-radius: var(--radius-small);
+    background: var(--panel);
+  }
+
+  .article-copy aside span {
+    color: var(--signal);
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .article-copy h2,
+  .related-work h2 {
+    margin: 0 0 18px;
+    font-family: var(--display);
+    font-size: clamp(2.6rem, 5vw, 4.6rem);
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+  }
+
+  .article-copy div p {
+    max-width: 72ch;
+    margin: 0 0 82px;
+    color: var(--muted);
+    font-size: clamp(1.12rem, 1.8vw, 1.32rem);
+    line-height: 1.62;
+  }
+
+  .related-work > div {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 38px;
+  }
+
+  .related-work a {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    min-height: 190px;
+    padding: 26px;
+    border-radius: var(--radius);
+    background: var(--panel);
+  }
+
+  .related-work a span {
+    grid-column: 1 / -1;
+    color: var(--muted);
+  }
+
+  .related-work a strong {
+    align-self: end;
+    font-family: var(--display);
+    font-size: 2rem;
+    font-weight: 400;
+  }
+
+  .related-work a i {
+    align-self: end;
+    color: var(--signal);
+    font-style: normal;
+  }
+
+  @media (max-width: 760px) {
+    .technology-article > header,
+    .article-copy {
+      grid-template-columns: 1fr;
+    }
+
+    .technology-mark {
+      max-width: 310px;
+    }
+
+    .related-work > div {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

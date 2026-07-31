@@ -1,0 +1,249 @@
+---
+import {
+  modulePath,
+  projectPath,
+  projects,
+  technologyIndexEntries,
+  technologyPath,
+  text,
+  type Locale,
+} from '@/data/content';
+
+interface Props {
+  locale: Locale;
+  canonicalPath: string;
+  alternatePath: string;
+}
+
+const { locale, canonicalPath, alternatePath } = Astro.props;
+const isEs = locale === 'es';
+const sections = [
+  { label: isEs ? 'Inicio' : 'Home', path: isEs ? '/' : '/en/' },
+  { label: isEs ? 'Sobre mí' : 'About', path: isEs ? '/sobre-mi/' : '/en/about/' },
+  { label: isEs ? 'Proyectos' : 'Projects', path: isEs ? '/proyectos/' : '/en/projects/' },
+  ...projects.flatMap((project) => [
+    { label: project.title, path: projectPath(project, locale) },
+    ...project.modules.map((module) => ({
+      label: text(module.title, locale),
+      path: modulePath(project, module, locale),
+    })),
+  ]),
+  { label: isEs ? 'Tecnologías' : 'Technologies', path: isEs ? '/tecnologias/' : '/en/technologies/' },
+  ...technologyIndexEntries.map(({ technology }) => ({
+    label: technology.name,
+    path: technologyPath(technology, locale),
+  })),
+];
+
+const currentIndex = sections.findIndex((section) => section.path === canonicalPath);
+if (currentIndex === -1) throw new Error(`Section navigation route is missing: ${canonicalPath}`);
+
+const previousIndex = (currentIndex - 1 + sections.length) % sections.length;
+const nextIndex = (currentIndex + 1) % sections.length;
+const previous = sections[previousIndex];
+const next = sections[nextIndex];
+---
+
+<nav class="section-navigation" aria-label={isEs ? 'Recorrido por páginas' : 'Page sequence'}>
+  <a
+    class="section-step section-step--previous"
+    href={previous.path}
+    aria-label={`${isEs ? 'Página anterior' : 'Previous page'}: ${previous.label}`}
+  >
+    <span class="section-arrow" aria-hidden="true">←</span>
+    <span class="section-position" aria-hidden="true">{String(previousIndex + 1).padStart(2, '0')}</span>
+    <span class="section-tooltip" aria-hidden="true">
+      <small>{isEs ? 'Anterior' : 'Previous'}</small>
+      <strong>{previous.label}</strong>
+    </span>
+  </a>
+
+  <a
+    class="section-locale"
+    href={alternatePath}
+    lang={isEs ? 'en' : 'es'}
+    hreflang={isEs ? 'en' : 'es'}
+    aria-label={isEs ? 'View this page in English' : 'Ver esta página en español'}
+  >
+    {isEs ? 'EN' : 'ES'}
+  </a>
+
+  <a
+    class="section-step section-step--next"
+    href={next.path}
+    aria-label={`${isEs ? 'Página siguiente' : 'Next page'}: ${next.label}`}
+  >
+    <span class="section-position" aria-hidden="true">{String(nextIndex + 1).padStart(2, '0')}</span>
+    <span class="section-arrow" aria-hidden="true">→</span>
+    <span class="section-tooltip" aria-hidden="true">
+      <small>{isEs ? 'Siguiente' : 'Next'}</small>
+      <strong>{next.label}</strong>
+    </span>
+  </a>
+</nav>
+
+<style>
+  .section-navigation {
+    position: relative;
+    z-index: 90;
+  }
+
+  .section-step {
+    position: fixed;
+    top: 50%;
+    display: grid;
+    width: 58px;
+    height: 118px;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: rgb(13 15 15 / 0.92);
+    box-shadow: 0 18px 42px rgb(0 0 0 / 0.42);
+    transform: translateY(-50%);
+    transition: border-color 180ms ease, background 180ms ease, transform 180ms var(--ease-out);
+  }
+
+  .section-step:hover,
+  .section-step:focus-visible {
+    border-color: var(--signal);
+    background: var(--panel-high);
+  }
+
+  .section-step--previous {
+    left: 12px;
+  }
+
+  .section-step--previous:hover,
+  .section-step--previous:focus-visible {
+    transform: translate(4px, -50%);
+  }
+
+  .section-step--next {
+    right: 12px;
+  }
+
+  .section-step--next:hover,
+  .section-step--next:focus-visible {
+    transform: translate(-4px, -50%);
+  }
+
+  .section-arrow {
+    color: var(--signal);
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  .section-position {
+    color: var(--muted);
+    font-size: 0.64rem;
+    letter-spacing: 0.12em;
+  }
+
+  .section-tooltip {
+    position: absolute;
+    top: 50%;
+    display: grid;
+    width: max-content;
+    min-width: 118px;
+    padding: 10px 13px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-small);
+    background: var(--panel-high);
+    box-shadow: 0 18px 36px rgb(0 0 0 / 0.46);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%) scale(0.96);
+    transition: opacity 180ms ease, transform 180ms var(--ease-out);
+  }
+
+  .section-step--previous .section-tooltip {
+    left: 70px;
+  }
+
+  .section-step--next .section-tooltip {
+    right: 70px;
+    text-align: right;
+  }
+
+  .section-step:hover .section-tooltip,
+  .section-step:focus-visible .section-tooltip {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+
+  .section-tooltip small {
+    color: var(--muted);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .section-tooltip strong {
+    font-family: var(--display);
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .section-locale {
+    position: fixed;
+    z-index: 91;
+    bottom: 14px;
+    left: 50%;
+    display: grid;
+    min-width: 46px;
+    min-height: 46px;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: rgb(13 15 15 / 0.92);
+    color: var(--muted);
+    font-size: 0.72rem;
+    transform: translateX(-50%);
+    transition: border-color 180ms ease, color 180ms ease;
+  }
+
+  .section-locale:hover,
+  .section-locale:focus-visible {
+    border-color: var(--signal);
+    color: var(--ink);
+  }
+
+  @media (max-width: 980px) {
+    .section-step {
+      top: auto;
+      bottom: 10px;
+      width: 52px;
+      height: 52px;
+      grid-template-columns: 1fr;
+      transform: none;
+    }
+
+    .section-step--previous {
+      left: 10px;
+    }
+
+    .section-step--next {
+      right: 10px;
+    }
+
+    .section-step:hover,
+    .section-step:focus-visible,
+    .section-step--previous:hover,
+    .section-step--previous:focus-visible,
+    .section-step--next:hover,
+    .section-step--next:focus-visible {
+      transform: translateY(-2px);
+    }
+
+    .section-position,
+    .section-tooltip {
+      display: none;
+    }
+
+    .section-locale {
+      bottom: 13px;
+      min-width: 46px;
+      min-height: 46px;
+    }
+  }
+</style>

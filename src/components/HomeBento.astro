@@ -1,0 +1,984 @@
+---
+import { Image } from 'astro:assets';
+import hero from '@/assets/hero.png';
+import BrandLogo from '@/components/BrandLogo.astro';
+import { projects, site, technologies, type Locale } from '@/data/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isEs = locale === 'es';
+const paths = {
+  projects: isEs ? '/proyectos/' : '/en/projects/',
+  technologies: isEs ? '/tecnologias/' : '/en/technologies/',
+  about: isEs ? '/sobre-mi/' : '/en/about/',
+  cv: isEs ? '/downloads/Carlos-Miranda-CV-es.pdf' : '/downloads/Carlos-Miranda-CV-en.pdf',
+};
+const technologyIconSlugs = ['html', 'css', 'astro', 'typescript', 'go', 'nodejs', 'docker', 'postgresql'];
+const technologyIcons = technologyIconSlugs
+  .map((slug) => technologies.find((technology) => technology.slug === slug))
+  .filter((technology) => technology !== undefined);
+---
+
+<!--
+THESIS: A portfolio explored as a live operations rack, refusing the standard hero followed by a uniform project-card grid.
+OWN-WORLD: Near-black equipment bays, warm readouts, one chartreuse live circuit, Array display lettering, Khand operational copy.
+STORY: Meet Carlos, follow his systems into projects and technologies, inspect evidence, then contact or download the resume.
+FIRST VIEWPORT: Portrait bay left, identity and project bays across the center, guided signal console and 3D server bay at right.
+FORM: Pinned asymmetric bento reference, translated into an interactive Experience surface with an activation sequence and spatial route handoffs.
+-->
+<section class="rack-home" data-rack-home aria-labelledby="home-title">
+  <script is:inline data-astro-rerun>
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('boot-pending');
+      window.setTimeout(() => document.documentElement.classList.remove('boot-pending'), 2500);
+    }
+  </script>
+  <div class="boot-screen" aria-hidden="true">
+    <span>CAMIR / SYSTEMS</span>
+    <i></i>
+  </div>
+
+  <div class="rack-grid">
+    <article class="rack-tile portrait-tile is-active is-revealed" data-rack-step="0" data-reveal-label={isEs ? '01 / Identidad activa' : '01 / Identity active'} transition:name="portrait" tabindex="0" aria-expanded="true">
+      <Image
+        src={hero}
+        alt={isEs ? 'Retrato de Carlos Miranda' : 'Portrait of Carlos Miranda'}
+        widths={[420, 640, 880]}
+        sizes="(max-width: 680px) 100vw, 36vw"
+        loading="eager"
+        fetchpriority="high"
+        quality={88}
+      />
+      <div class="portrait-caption">
+        <p>{isEs ? 'Hola, soy' : 'Hello, I’m'}</p>
+        <h1 id="home-title">Carlos Miranda</h1>
+      </div>
+    </article>
+
+    <a class="rack-tile projects-tile" data-rack-step="2" data-reveal-label={isEs ? '03 / Tocar para activar trabajo' : '03 / Touch to activate work'} href={paths.projects} transition:name="projects-bay" aria-expanded="false">
+      <header>
+        <span class="status-label">{isEs ? 'Trabajo seleccionado' : 'Selected work'}</span>
+        <span aria-hidden="true">↗</span>
+      </header>
+      <div class="project-stack">
+        {projects.map((project, index) => (
+          <article class={`project-strip project-strip-${index + 1}`}>
+            <span>{project.period}</span>
+            <h2>{project.title}</h2>
+            <p>{project.summary[locale]}</p>
+          </article>
+        ))}
+      </div>
+    </a>
+
+    <a class="rack-tile technologies-tile" data-rack-step="3" data-reveal-label={isEs ? '04 / Tocar para activar stack' : '04 / Touch to activate stack'} href={paths.technologies} transition:name="technologies-bay" aria-expanded="false">
+      <span class="technologies-link" aria-hidden="true">↗</span>
+      <div class="technology-icons" aria-hidden="true">
+        {technologyIcons.map((technology) => <img src={technology.logo} alt="" width="44" height="44" loading="lazy" />)}
+      </div>
+      <div>
+        <strong>{technologies.length}</strong>
+        <p>{isEs ? 'tecnologías conectadas a evidencia real' : 'technologies connected to real evidence'}</p>
+      </div>
+    </a>
+
+    <a class="rack-tile about-tile" data-rack-step="1" data-reveal-label={isEs ? '02 / Tocar para activar perfil' : '02 / Touch to activate profile'} href={paths.about} transition:name="about-bay" aria-expanded="false">
+      <span class="status-label">{isEs ? 'Sobre mí' : 'About'}</span>
+      <blockquote>
+        {isEs
+          ? 'Construyo el producto, entiendo su operación y mantengo la infraestructura que lo sostiene.'
+          : 'I build the product, understand its operation, and maintain the infrastructure that supports it.'}
+      </blockquote>
+      <span class="about-link">{isEs ? 'Abrir perfil' : 'Open profile'} <i aria-hidden="true">↗</i></span>
+    </a>
+
+    <article class="rack-tile contact-tile" data-rack-step="4" data-reveal-label={isEs ? '05 / Tocar para abrir contacto' : '05 / Touch to open contact'} tabindex="0" aria-expanded="false">
+      <div>
+        <span class="status-label">{isEs ? 'Siguiente paso' : 'Next step'}</span>
+        <h2>{isEs ? '¿Construimos algo que deba funcionar de verdad?' : 'Shall we build something that has to work for real?'}</h2>
+      </div>
+      <div class="contact-actions home-contact-actions">
+        <a class="button compact-home-action cv-button" href={paths.cv} download><span class="action-icon download-icon" aria-hidden="true"></span>{isEs ? 'Descargar CV' : 'Download résumé'}</a>
+        <a class="button compact-home-action secondary" href={`mailto:${site.email}`}><span class="action-icon mail-icon" aria-hidden="true"></span>{isEs ? 'Correo' : 'Email'}</a>
+        <a class="button compact-home-action secondary" href={site.linkedin} target="_blank" rel="noreferrer"><BrandLogo name="linkedin" /> LinkedIn</a>
+        <a class="button compact-home-action secondary" href={site.github} target="_blank" rel="noreferrer"><BrandLogo name="github" /> GitHub</a>
+      </div>
+    </article>
+
+    <article class="rack-tile server-tile" data-rack-step="5" data-reveal-label={isEs ? '06 / Tocar para encender rack' : '06 / Touch to power the rack'} tabindex="0" aria-expanded="false">
+      <header>
+        <span class="status-label">{isEs ? 'Infraestructura' : 'Infrastructure'}</span>
+        <span class="server-health"><i></i>{isEs ? 'Operativa' : 'Operational'}</span>
+      </header>
+      <div class="server-fallback" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <canvas data-server-canvas aria-hidden="true"></canvas>
+      <p>{isEs ? 'Servicios web, datos y observabilidad en una misma topología.' : 'Web services, data, and observability in one topology.'}</p>
+    </article>
+
+    <aside class="rack-tile guide-tile">
+      <div class="language-selector">
+        <h2>{isEs ? 'Selecciona el idioma' : 'Choose your language'}</h2>
+        <nav aria-label="Selector de idioma / Language selector">
+          <a href="/" lang="es" hreflang="es" aria-current={isEs ? 'page' : undefined} data-language-option="es">
+            <span>ES</span>
+            <strong>Español</strong>
+            <small>{isEs ? 'Activo' : 'Seleccionar'}</small>
+          </a>
+          <a href="/en/" lang="en" hreflang="en" aria-current={!isEs ? 'page' : undefined} data-language-option="en">
+            <span>EN</span>
+            <strong>English</strong>
+            <small>{isEs ? 'Seleccionar' : 'Active'}</small>
+          </a>
+        </nav>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<script>
+  import gsap from 'gsap';
+
+  declare global {
+    interface Window {
+      __rackCleanup?: () => void;
+    }
+  }
+
+  async function createServerScene(canvas: HTMLCanvasElement, reducedMotion: boolean) {
+    const {
+      WebGLRenderer,
+      Scene,
+      PerspectiveCamera,
+      Group,
+      Mesh,
+      BoxGeometry,
+      MeshStandardMaterial,
+      MeshBasicMaterial,
+      AmbientLight,
+      DirectionalLight,
+    } = await import('three');
+    let renderer: import('three').WebGLRenderer;
+    try {
+      renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
+    } catch {
+      return null;
+    }
+
+    const tile = canvas.closest<HTMLElement>('.server-tile');
+    const scene = new Scene();
+    const camera = new PerspectiveCamera(34, 1, 0.1, 100);
+    camera.position.set(3.2, 2.2, 5.8);
+    camera.lookAt(0, 0.3, 0);
+    const group = new Group();
+    scene.add(group);
+
+    const frame = new Mesh(
+      new BoxGeometry(2.8, 3.6, 1.55),
+      new MeshStandardMaterial({ color: 0x20251f, roughness: 0.62, metalness: 0.58 }),
+    );
+    group.add(frame);
+
+    const bayMaterial = new MeshStandardMaterial({ color: 0x444d43, roughness: 0.35, metalness: 0.72 });
+    const lightMaterial = new MeshBasicMaterial({ color: 0xd7ff4f });
+    for (let index = 0; index < 7; index += 1) {
+      const bay = new Mesh(new BoxGeometry(2.45, 0.34, 0.11), bayMaterial);
+      bay.position.set(0, 1.35 - index * 0.45, 0.83);
+      group.add(bay);
+      const light = new Mesh(new BoxGeometry(0.18, 0.055, 0.035), lightMaterial);
+      light.position.set(0.87, 1.35 - index * 0.45, 0.9);
+      group.add(light);
+    }
+
+    scene.add(new AmbientLight(0xeaf3e8, 2.6));
+    const key = new DirectionalLight(0xd7ff4f, 4.4);
+    key.position.set(3, 4, 5);
+    scene.add(key);
+
+    let frameId = 0;
+    const resize = () => {
+      const width = canvas.clientWidth || 320;
+      const height = canvas.clientHeight || 260;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    };
+    const render = (time = 0) => {
+      if (!reducedMotion) group.rotation.y = -0.35 + Math.sin(time * 0.00035) * 0.12;
+      renderer.render(scene, camera);
+      if (!canvas.dataset.serverReady) {
+        canvas.dataset.serverReady = 'true';
+        tile?.classList.add('has-server-scene');
+      }
+      if (!reducedMotion) frameId = requestAnimationFrame(render);
+    };
+    const resizeObserver = new ResizeObserver(resize);
+    const handleContextLost = (event: Event) => {
+      event.preventDefault();
+      cancelAnimationFrame(frameId);
+      delete canvas.dataset.serverReady;
+      tile?.classList.remove('has-server-scene');
+    };
+    resize();
+    render();
+    resizeObserver.observe(canvas);
+    canvas.addEventListener('webglcontextlost', handleContextLost);
+    return () => {
+      cancelAnimationFrame(frameId);
+      resizeObserver.disconnect();
+      canvas.removeEventListener('webglcontextlost', handleContextLost);
+      delete canvas.dataset.serverReady;
+      tile?.classList.remove('has-server-scene');
+      renderer.dispose();
+      scene.traverse((object) => {
+        if (object instanceof Mesh) {
+          object.geometry.dispose();
+          const materials = Array.isArray(object.material) ? object.material : [object.material];
+          materials.forEach((material) => material.dispose());
+        }
+      });
+    };
+  }
+
+  function initializeRack() {
+    window.__rackCleanup?.();
+    const root = document.querySelector<HTMLElement>('[data-rack-home]');
+    if (!root) return;
+    document.documentElement.classList.add('js');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const steps = [...root.querySelectorAll<HTMLElement>('[data-rack-step]')]
+      .sort((a, b) => Number(a.dataset.rackStep) - Number(b.dataset.rackStep));
+    const revealed = new Set<number>([0]);
+    const controller = new AbortController();
+
+    const canvas = root.querySelector<HTMLCanvasElement>('[data-server-canvas]');
+    let active = true;
+    let serverStarted = false;
+    let disposeServer = () => {};
+    const startServer = () => {
+      if (!canvas || reducedMotion || serverStarted) return;
+      serverStarted = true;
+      void createServerScene(canvas, reducedMotion)
+        .then((dispose) => {
+          if (!dispose) {
+            serverStarted = false;
+            return;
+          }
+          if (active) disposeServer = dispose;
+          else dispose();
+        })
+        .catch(() => {
+          serverStarted = false;
+        });
+    };
+
+    const updateGuide = (index: number) => {
+      steps.forEach((step, stepIndex) => step.classList.toggle('is-active', stepIndex === index));
+    };
+
+    const reveal = (index: number) => {
+      if (revealed.has(index)) return false;
+      const step = steps[index];
+      revealed.add(index);
+      step.classList.add('is-revealed');
+      step.setAttribute('aria-expanded', 'true');
+      if (index === 5) startServer();
+
+      if (!reducedMotion) {
+        const content = step.querySelectorAll<HTMLElement>(':scope > *');
+        gsap.fromTo(step, { clipPath: 'inset(0 0 100% 0)', scale: 0.985 }, { clipPath: 'inset(0% 0 0% 0)', scale: 1, duration: 0.72, ease: 'expo.out', clearProps: 'clipPath,scale' });
+        gsap.fromTo(content, { autoAlpha: 0, y: 18, filter: 'blur(8px)' }, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.58, stagger: 0.035, ease: 'expo.out', clearProps: 'all' });
+      }
+
+      const nextIndex = steps.findIndex((_, stepIndex) => !revealed.has(stepIndex));
+      updateGuide(nextIndex === -1 ? 5 : index);
+      return true;
+    };
+
+    steps.forEach((step, index) => {
+      if (index !== 0) step.classList.remove('is-revealed');
+      step.setAttribute('aria-expanded', index === 0 ? 'true' : 'false');
+      step.addEventListener('focusin', () => {
+        if (revealed.has(index)) updateGuide(index);
+      }, { signal: controller.signal });
+      step.addEventListener('click', (event) => {
+        if (revealed.has(index)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        reveal(index);
+      }, { signal: controller.signal });
+      if (!(step instanceof HTMLAnchorElement)) {
+        step.addEventListener('keydown', (event) => {
+          if (revealed.has(index) || (event.key !== 'Enter' && event.key !== ' ')) return;
+          event.preventDefault();
+          reveal(index);
+        }, { signal: controller.signal });
+      }
+    });
+
+    updateGuide(0);
+
+    const boot = root.querySelector<HTMLElement>('.boot-screen');
+    const bootPending = document.documentElement.classList.contains('boot-pending');
+    if (!reducedMotion && bootPending) {
+      const bootFailsafe = window.setTimeout(() => {
+        boot?.remove();
+        document.documentElement.classList.remove('boot-pending');
+      }, 2500);
+      const timeline = gsap.timeline({ defaults: { ease: 'expo.out' } });
+      timeline
+        .fromTo('.boot-screen i', { scaleX: 0 }, { scaleX: 1, duration: 0.65, transformOrigin: 'left' })
+        .to('.boot-screen', { clipPath: 'inset(0 0 100% 0)', duration: 0.8 }, '+=0.1')
+        .fromTo('.rack-tile', { clipPath: 'inset(100% 0 0 0)', y: 28 }, { clipPath: 'inset(0% 0 0 0)', y: 0, duration: 0.85, stagger: 0.055, onComplete: () => {
+          window.clearTimeout(bootFailsafe);
+          boot?.remove();
+          document.documentElement.classList.remove('boot-pending');
+        } }, '-=0.45');
+    } else {
+      boot?.remove();
+      document.documentElement.classList.remove('boot-pending');
+    }
+
+    window.__rackCleanup = () => {
+      active = false;
+      controller.abort();
+      disposeServer();
+      document.documentElement.classList.remove('boot-pending');
+    };
+  }
+
+  document.addEventListener('astro:page-load', initializeRack);
+  document.addEventListener('astro:before-swap', () => window.__rackCleanup?.());
+  initializeRack();
+</script>
+
+<style>
+  .rack-home {
+    width: 100%;
+    height: 100svh;
+    min-height: 620px;
+    margin: 0;
+    padding: 10px;
+    overflow: hidden;
+  }
+
+  .boot-screen {
+    position: fixed;
+    z-index: 100;
+    inset: 0;
+    display: none;
+    place-content: center;
+    gap: 20px;
+    background: var(--rack-black);
+    color: var(--muted);
+    letter-spacing: 0.12em;
+  }
+
+  :global(.boot-pending) .boot-screen {
+    display: grid;
+  }
+
+  .boot-screen i {
+    width: min(280px, 70vw);
+    height: 3px;
+    background: var(--signal);
+  }
+
+  .rack-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .rack-tile {
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+    border-radius: var(--radius);
+    background: var(--panel);
+    box-shadow: var(--shadow-panel);
+    transition: background 420ms var(--ease-out), box-shadow 260ms ease;
+  }
+
+  :global(.js) .rack-tile[data-rack-step] {
+    cursor: pointer;
+  }
+
+  :global(.js) .rack-tile[data-rack-step]:not(.is-revealed) {
+    background: var(--rack-deep);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+
+  :global(.js) .rack-tile[data-rack-step]:not(.is-revealed) > * {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+  }
+
+  :global(.js) .rack-tile[data-rack-step]:not(.is-revealed)::before {
+    position: absolute;
+    z-index: 5;
+    top: 50%;
+    left: 50%;
+    width: max-content;
+    max-width: calc(100% - 36px);
+    color: var(--muted);
+    content: attr(data-reveal-label);
+    font-size: 0.76rem;
+    letter-spacing: 0.08em;
+    text-align: center;
+    text-transform: uppercase;
+    transform: translate(-50%, -50%);
+  }
+
+  :global(.js) .rack-tile[data-rack-step]:not(.is-revealed)::after {
+    position: absolute;
+    z-index: 5;
+    right: 16px;
+    bottom: 16px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--line);
+    content: '';
+  }
+
+  :global(.js) .rack-tile[data-rack-step].is-active:not(.is-revealed) {
+    box-shadow: inset 0 0 0 2px var(--signal), 0 18px 34px rgb(0 0 0 / 0.38);
+  }
+
+  :global(.js) .rack-tile[data-rack-step].is-active:not(.is-revealed)::after {
+    background: var(--signal);
+    box-shadow: 0 0 0 5px rgb(215 255 79 / 0.12);
+  }
+
+  .portrait-tile {
+    grid-column: 1 / 5;
+    grid-row: 1 / 5;
+    background: #d7ff4f;
+    color: var(--signal-ink);
+  }
+
+  .portrait-tile::after {
+    position: absolute;
+    inset: auto 0 0;
+    height: 54%;
+    background: linear-gradient(transparent, rgb(215 255 79 / 0.94) 70%);
+    content: '';
+  }
+
+  .portrait-tile img {
+    position: absolute;
+    top: 1%;
+    left: 50%;
+    width: 98%;
+    height: 80%;
+    object-fit: contain;
+    object-position: center top;
+    transform: translateX(-50%);
+  }
+
+  .portrait-caption {
+    position: absolute;
+    z-index: 3;
+    right: 22px;
+    bottom: 21px;
+    left: 22px;
+  }
+
+  .portrait-caption p {
+    margin: 0;
+  }
+
+  .portrait-caption h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-size: clamp(2.7rem, 5.3vw, 5rem);
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    line-height: 0.83;
+  }
+
+  .projects-tile {
+    grid-column: 5 / 8;
+    grid-row: 4 / 7;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+  }
+
+  .rack-tile header {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .project-stack {
+    position: relative;
+    flex: 1;
+    margin-top: 18px;
+  }
+
+  .project-strip {
+    position: absolute;
+    right: 0;
+    left: 0;
+    min-height: 48%;
+    padding: 18px 20px;
+    border-radius: var(--radius-small);
+    color: var(--rack-black);
+    transition: transform 280ms var(--ease-out);
+  }
+
+  .project-strip-1 {
+    z-index: 1;
+    top: 0;
+    background: var(--ink);
+    transform: rotate(-1.7deg);
+  }
+
+  .project-strip-2 {
+    z-index: 2;
+    bottom: 0;
+    background: var(--signal);
+    color: var(--signal-ink);
+    transform: translateX(7%) rotate(1.4deg);
+  }
+
+  .projects-tile:hover .project-strip-1 {
+    transform: translateY(-6px) rotate(-2.5deg);
+  }
+
+  .projects-tile:hover .project-strip-2 {
+    transform: translateX(3%) translateY(5px) rotate(0.5deg);
+  }
+
+  .project-strip span {
+    float: right;
+    font-size: 0.68rem;
+  }
+
+  .project-strip h2 {
+    margin: 0 0 4px;
+    font-family: var(--display);
+    font-size: clamp(1.45rem, 2.7vw, 2.4rem);
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  .project-strip p {
+    max-width: 34ch;
+    margin: 0;
+    font-size: 0.73rem;
+    line-height: 1.25;
+  }
+
+  .technologies-tile {
+    grid-column: 10 / 13;
+    grid-row: 1 / 4;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 22px;
+    background: var(--ink);
+    color: var(--rack-black);
+  }
+
+  .technologies-link {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+  }
+
+  .technologies-tile strong {
+    font-family: var(--display);
+    font-size: clamp(4rem, 8vw, 7rem);
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    line-height: 0.7;
+  }
+
+  .technologies-tile p {
+    max-width: 18ch;
+    margin: 16px 0 0;
+    line-height: 1.15;
+  }
+
+  .technology-icons {
+    position: absolute;
+    inset: 24px 22px auto;
+    height: 48%;
+    pointer-events: none;
+  }
+
+  .technology-icons img {
+    position: absolute;
+    width: clamp(28px, 3vw, 42px);
+    height: clamp(28px, 3vw, 42px);
+    object-fit: contain;
+  }
+
+  .technology-icons img:nth-child(1) { top: 2%; left: 2%; transform: rotate(-11deg); }
+  .technology-icons img:nth-child(2) { top: 5%; right: 10%; transform: rotate(9deg); }
+  .technology-icons img:nth-child(3) { top: 32%; left: 35%; transform: rotate(7deg); }
+  .technology-icons img:nth-child(4) { top: 47%; right: 1%; transform: rotate(-8deg); }
+  .technology-icons img:nth-child(5) { bottom: 0; left: 5%; transform: rotate(12deg); }
+  .technology-icons img:nth-child(6) { right: 2%; bottom: 2%; transform: rotate(-5deg); }
+  .technology-icons img:nth-child(7) { top: 1%; left: 53%; transform: rotate(5deg); }
+  .technology-icons img:nth-child(8) { bottom: -4%; left: 42%; transform: rotate(-10deg); }
+
+  .about-tile {
+    grid-column: 5 / 10;
+    grid-row: 1 / 4;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 22px;
+  }
+
+  .about-tile blockquote {
+    max-width: 22ch;
+    margin: 0;
+    font-family: var(--display);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    letter-spacing: -0.025em;
+    line-height: 1;
+  }
+
+  .about-link {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+  }
+
+  .contact-tile {
+    grid-column: 1 / 5;
+    grid-row: 5 / 7;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 22px;
+  }
+
+  .contact-tile h2 {
+    max-width: 19ch;
+    margin: 10px 0 18px;
+    font-family: var(--display);
+    font-size: clamp(1.45rem, 2.6vw, 2.4rem);
+    font-weight: 400;
+    line-height: 0.98;
+  }
+
+  .contact-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .contact-actions .button {
+    min-height: 38px;
+    padding: 7px 9px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .contact-actions .action-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .action-icon {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    background: currentColor;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+  }
+
+  .mail-icon {
+    mask-image: url('/assets/logos/mail.svg');
+  }
+
+  .download-icon {
+    mask-image: url('/assets/logos/software-download.svg');
+  }
+
+  .server-tile {
+    grid-column: 8 / 11;
+    grid-row: 4 / 7;
+    padding: 20px;
+    background: #101311;
+  }
+
+  .server-tile canvas,
+  .server-fallback {
+    position: absolute;
+    inset: 44px 0 30px;
+    width: 100%;
+    height: calc(100% - 74px);
+  }
+
+  .server-tile canvas {
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 320ms var(--ease-out);
+  }
+
+  .server-fallback {
+    display: grid;
+    align-content: center;
+    gap: 7px;
+    padding: 30px 24%;
+    opacity: 1;
+    transition: opacity 220ms ease;
+  }
+
+  .server-tile.has-server-scene canvas {
+    opacity: 1;
+  }
+
+  .server-tile.has-server-scene .server-fallback {
+    opacity: 0;
+  }
+
+  .server-fallback i {
+    height: 16px;
+    border-radius: 3px;
+    background: #2b302c;
+    box-shadow: inset -8px 0 var(--signal);
+  }
+
+  .server-tile p {
+    position: absolute;
+    z-index: 2;
+    right: 18px;
+    bottom: 14px;
+    left: 18px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.68rem;
+  }
+
+  .server-health {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+
+  .server-health i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--signal);
+  }
+
+  .guide-tile {
+    grid-column: 11 / 13;
+    grid-row: 4 / 7;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px;
+    background: var(--signal);
+    color: var(--signal-ink);
+  }
+
+  .language-selector h2 {
+    max-width: 9ch;
+    margin: 0 0 14px;
+    font-family: var(--display);
+    font-size: clamp(1.15rem, 1.75vw, 1.65rem);
+    font-weight: 400;
+    line-height: 0.98;
+  }
+
+  .language-selector nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border: 1px solid rgb(8 9 9 / 0.3);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .language-selector a {
+    display: flex;
+    min-width: 0;
+    min-height: 72px;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 9px;
+    color: inherit;
+    transition: background 180ms ease, color 180ms ease;
+  }
+
+  .language-selector a + a {
+    border-left: 1px solid rgb(8 9 9 / 0.3);
+  }
+
+  .language-selector a[aria-current='page'] {
+    background: var(--signal-ink);
+    color: var(--signal);
+  }
+
+  .language-selector a:not([aria-current='page']):hover,
+  .language-selector a:not([aria-current='page']):focus-visible {
+    background: rgb(8 9 9 / 0.12);
+  }
+
+  .language-selector a > span,
+  .language-selector small {
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .language-selector strong {
+    overflow: hidden;
+    font-size: 0.78rem;
+    font-weight: 500;
+    text-overflow: ellipsis;
+  }
+
+  @media (max-width: 1080px) {
+    .rack-home {
+      height: auto;
+      min-height: 100svh;
+      overflow: visible;
+    }
+
+    .rack-grid {
+      grid-template-rows: repeat(9, minmax(90px, auto));
+      min-height: auto;
+    }
+
+    .portrait-tile { grid-column: 1 / 6; grid-row: 1 / 5; }
+    .about-tile { grid-column: 6 / 13; grid-row: 1 / 4; }
+    .technologies-tile { grid-column: 6 / 10; grid-row: 4 / 7; }
+    .guide-tile { grid-column: 10 / 13; grid-row: 4 / 7; }
+    .contact-tile { grid-column: 1 / 6; grid-row: 5 / 7; }
+    .projects-tile { grid-column: 1 / 7; grid-row: 7 / 10; }
+    .server-tile { grid-column: 7 / 13; grid-row: 7 / 10; min-height: 320px; }
+  }
+
+  @media (max-width: 680px) {
+    .rack-home {
+      min-height: auto;
+      padding: 8px;
+    }
+
+    .rack-grid {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .rack-tile {
+      min-height: 300px;
+    }
+
+    .portrait-tile {
+      min-height: min(610px, 77svh);
+      order: 1;
+    }
+
+    .guide-tile {
+      min-height: 210px;
+      order: 2;
+    }
+
+    .projects-tile {
+      min-height: 430px;
+      order: 4;
+    }
+
+    .technologies-tile {
+      min-height: 380px;
+      order: 5;
+    }
+
+    .about-tile {
+      min-height: 310px;
+      order: 3;
+    }
+
+    .server-tile {
+      min-height: 360px;
+      order: 7;
+    }
+
+    .contact-tile {
+      min-height: 330px;
+      order: 6;
+    }
+
+    .contact-actions {
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .contact-actions .button {
+      min-height: 42px;
+      padding: 9px 17px;
+      font-size: 0.74rem;
+    }
+
+    .portrait-caption h1 {
+      font-size: clamp(3.2rem, 16vw, 5rem);
+    }
+
+    .cv-button {
+      width: 100%;
+      margin: 8px 0 0;
+    }
+  }
+
+  @media (min-width: 1081px) and (max-height: 820px) {
+    .projects-tile,
+    .about-tile,
+    .contact-tile,
+    .technologies-tile,
+    .guide-tile,
+    .server-tile {
+      padding: 16px;
+    }
+
+    .portrait-caption h1 {
+      font-size: clamp(2.25rem, 6.5vh, 4rem);
+    }
+
+    .about-tile blockquote {
+      font-size: clamp(1.25rem, 3.5vh, 2rem);
+    }
+
+    .contact-tile h2 {
+      margin-bottom: 10px;
+      font-size: clamp(1.2rem, 3vh, 1.8rem);
+    }
+
+    .technologies-tile strong {
+      font-size: clamp(3rem, 9vh, 5.2rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .boot-screen {
+      display: none;
+    }
+  }
+</style>

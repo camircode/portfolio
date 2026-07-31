@@ -1,0 +1,108 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { technologyIndexEntries, technologyPath, type Locale } from '@/data/content';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const isEs = locale === 'es';
+---
+
+<BaseLayout
+  locale={locale}
+  title={isEs ? 'Tecnologías' : 'Technologies'}
+  description={isEs ? 'Tecnologías que Carlos Miranda usa en proyectos reales, explicadas por propósito y aplicación.' : 'Technologies Carlos Miranda uses in real projects, explained through purpose and application.'}
+  canonicalPath={isEs ? '/tecnologias/' : '/en/technologies/'}
+  alternatePath={isEs ? '/en/technologies/' : '/tecnologias/'}
+>
+  <section class="page-shell">
+    <header class="page-intro technology-intro">
+      <h1>{isEs ? 'Software con el que trabajo' : 'Software I work with'}</h1>
+    </header>
+    <ol class="technology-grid" transition:name="technologies-bay">
+      {technologyIndexEntries.map(({ technology, sourceIndex }) => (
+        <li class:list={['technology-card', { 'is-signal': sourceIndex % 2 === 0 }]} data-technology={technology.slug} transition:name={`technology-${technology.slug}`}>
+          <a href={technologyPath(technology, locale)}>
+            <picture>
+              <img src={sourceIndex % 2 === 0 ? technology.logo : (technology.logoOnDark ?? technology.logo)} alt="" loading="lazy" />
+            </picture>
+            <div>
+              <p class="status-label">{technology.category[locale]}</p>
+              <h2>{technology.name}</h2>
+              <p>{technology.summary[locale]}</p>
+              <p class="technology-purpose">{technology.purpose[locale]}</p>
+            </div>
+            <span class="card-link-label">{isEs ? 'Leer artículo' : 'Read article'} <span aria-hidden="true">↗</span></span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+</BaseLayout>
+
+<style>
+  .technology-intro {
+    grid-template-columns: 1fr;
+  }
+
+  .technology-card a {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+  }
+
+  .technology-card:nth-child(n) {
+    grid-column: span 6;
+  }
+
+  .technology-card.is-signal {
+    background: var(--signal);
+    color: var(--signal-ink);
+  }
+
+  .technology-card.is-signal p,
+  .technology-card.is-signal .status-label,
+  .technology-card.is-signal .card-link-label {
+    color: #394020;
+  }
+
+  .technology-card picture {
+    display: block;
+    width: 46px;
+    height: 46px;
+    margin-bottom: 54px;
+  }
+
+  .technology-card picture img {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+  }
+
+  .technology-card[data-technology='go'] picture {
+    width: 92px;
+  }
+
+  .technology-card[data-technology='go'] picture img {
+    transform: scale(1.8);
+    transform-origin: left center;
+  }
+
+  .technology-purpose {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid currentColor;
+    opacity: 0.78;
+  }
+
+  @media (max-width: 980px) {
+    .technology-card:nth-child(n) {
+      grid-column: span 6;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .technology-card:nth-child(n) {
+      grid-column: 1;
+    }
+  }
+</style>

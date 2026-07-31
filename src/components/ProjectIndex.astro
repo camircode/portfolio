@@ -1,0 +1,99 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { projects, projectPath, type Locale } from '@/data/content';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const isEs = locale === 'es';
+---
+
+<BaseLayout
+  locale={locale}
+  title={isEs ? 'Proyectos' : 'Projects'}
+  description={isEs ? 'Casos de estudio de FER&REN Portal y 2 Free, con sus aplicaciones, arquitectura y tecnologías.' : 'FER&REN Portal and 2 Free case studies, including their applications, architecture, and technologies.'}
+  canonicalPath={isEs ? '/proyectos/' : '/en/projects/'}
+  alternatePath={isEs ? '/en/projects/' : '/proyectos/'}
+>
+  <section class="page-shell">
+    <header class="page-intro">
+      <h1>{isEs ? 'Proyectos que he desarrollado' : 'Projects I have developed'}</h1>
+    </header>
+    <ol class="bento-list" transition:name="projects-bay">
+      {projects.map((project) => (
+        <li class="index-card" transition:name={`${project.slug}-card`}>
+          <a href={projectPath(project, locale)} aria-label={`${isEs ? 'Abrir proyecto' : 'Open project'} ${project.title}`}>
+            <div>
+              <img class="project-logo" src={project.logo} alt="" width="96" height="96" loading="eager" />
+              <h2>{project.title}</h2>
+              <p class="project-card-description">{project.description[locale]}</p>
+              <ul>
+                {project.highlights.slice(0, 2).map((highlight) => <li>{highlight[locale]}</li>)}
+              </ul>
+            </div>
+            <span class="card-link-label">
+              {project.modules.length} {isEs ? 'aplicaciones / áreas' : 'applications / areas'}
+              <span aria-hidden="true">↗</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+</BaseLayout>
+
+<style>
+  .index-card a {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .index-card:nth-child(n) {
+    grid-column: span 6;
+  }
+
+  .project-logo {
+    width: 72px;
+    height: 72px;
+    margin-bottom: 42px;
+    object-fit: contain;
+    object-position: left center;
+  }
+
+  .project-card-description {
+    margin-bottom: 28px;
+    font-size: 1.05rem;
+  }
+
+  .index-card ul {
+    display: grid;
+    gap: 8px;
+    max-width: 58ch;
+    margin: 0;
+    padding-left: 1.1em;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .index-card:nth-child(2) {
+    background: var(--signal);
+    color: var(--signal-ink);
+  }
+
+  .index-card:nth-child(2) p,
+  .index-card:nth-child(2) .status-label,
+  .index-card:nth-child(2) .card-link-label {
+    color: #313720;
+  }
+
+  .index-card:nth-child(2) ul {
+    color: #394020;
+  }
+
+  @media (max-width: 680px) {
+    .index-card:nth-child(n) {
+      grid-column: 1;
+    }
+  }
+</style>

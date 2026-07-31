@@ -1,0 +1,134 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import SectionNavigation from '@/components/SectionNavigation.astro';
+import '@/styles/global.css';
+import { site, type Locale } from '@/data/content';
+
+interface Props {
+  title?: string;
+  description?: string;
+  locale: Locale;
+  canonicalPath: string;
+  alternatePath: string;
+  image?: string;
+  noindex?: boolean;
+  immersive?: boolean;
+}
+
+const {
+  locale,
+  title,
+  description: providedDescription,
+  canonicalPath,
+  alternatePath,
+  image = '/assets/og/portfolio.png',
+  noindex = false,
+  immersive = false,
+} = Astro.props;
+const description = providedDescription ?? site.description[locale];
+const pageTitle = title ? `${title} | ${site.name}` : `${site.name} | Software & DevOps`;
+const canonical = new URL(canonicalPath, site.domain).toString();
+const alternate = new URL(alternatePath, site.domain).toString();
+const ogImage = new URL(image, site.domain).toString();
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.name,
+  url: site.domain,
+  image: new URL('/assets/hero.webp', site.domain).toString(),
+  sameAs: [site.github, site.linkedin],
+  jobTitle: locale === 'es' ? 'Desarrollador de software y consultor DevOps' : 'Software developer and DevOps consultant',
+  knowsAbout: ['Astro', 'TypeScript', 'Go', 'React', 'DevOps', 'PostgreSQL', 'Tauri', 'Self-hosting'],
+};
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#080909" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content={description} />
+    <meta name="author" content={site.name} />
+    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang={locale === 'es' ? 'en' : 'es'} href={alternate} />
+    <link rel="alternate" hreflang={locale} href={canonical} />
+    <link rel="alternate" hreflang="x-default" href={locale === 'es' ? canonical : alternate} />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content={locale === 'es' ? 'es_MX' : 'en_US'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+    <script is:inline data-astro-rerun>
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('reveal-ready');
+        window.clearTimeout(window.__sectionRevealFailsafe);
+        window.__sectionRevealFailsafe = window.setTimeout(() => document.documentElement.classList.remove('reveal-ready'), 2500);
+      }
+    </script>
+    <title>{pageTitle}</title>
+    <ClientRouter />
+  </head>
+  <body class:list={{ 'immersive-page': immersive }}>
+    <a class="skip-link" href="#main-content">{locale === 'es' ? 'Saltar al contenido' : 'Skip to content'}</a>
+    {!immersive && <SectionNavigation locale={locale} canonicalPath={canonicalPath} alternatePath={alternatePath} />}
+    <main id="main-content">
+      <slot />
+    </main>
+    <script>
+      declare global {
+        interface Window {
+          __sectionRevealCleanup?: () => void;
+          __sectionRevealFailsafe?: number;
+        }
+      }
+
+      const revealSelector = '.project-narrative, .detail-section, .modules-section > header, .module-card, .technology-card, .index-card, .article-copy > *, .related-work, .flow-board, .module-evidence, .timeline > h2, .timeline > article, .about-bays > article';
+
+      function initializeSectionReveals() {
+        window.__sectionRevealCleanup?.();
+        window.clearTimeout(window.__sectionRevealFailsafe);
+        const revealRoot = document.documentElement;
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (reducedMotion || document.body.classList.contains('immersive-page')) {
+          revealRoot.classList.remove('reveal-ready');
+          return;
+        }
+
+        revealRoot.classList.add('reveal-ready');
+        const revealItems = [...document.querySelectorAll<HTMLElement>(revealSelector)];
+        let revealCardIndex = 0;
+        const revealObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            revealObserver.unobserve(entry.target);
+          });
+        }, { rootMargin: '0px 0px -6% 0px', threshold: 0.12 });
+
+        revealItems.forEach((item) => {
+          const isCard = item.matches('.module-card, .technology-card, .index-card, .timeline > article, .about-bays > article');
+          item.style.setProperty('--reveal-delay', `${isCard ? (revealCardIndex++ % 2) * 55 : 0}ms`);
+          revealObserver.observe(item);
+        });
+        window.__sectionRevealCleanup = () => revealObserver.disconnect();
+      }
+
+      document.addEventListener('astro:page-load', initializeSectionReveals);
+      document.addEventListener('astro:before-swap', () => window.__sectionRevealCleanup?.());
+    </script>
+  </body>
+</html>

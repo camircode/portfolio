@@ -1,0 +1,101 @@
+---
+interface Props {
+  project: 'portal' | '2free';
+  slug: string;
+}
+
+const { project, slug } = Astro.props;
+---
+
+<div class={`module-artifact module-artifact--${project}`} data-module-artifact={`${project}:${slug}`} aria-hidden="true">
+  <canvas data-module-artifact-canvas></canvas>
+  <div class="module-artifact-fallback">
+    <i></i><i></i><i></i>
+  </div>
+</div>
+
+<style>
+  .module-artifact {
+    position: absolute;
+    z-index: 0;
+    top: 14px;
+    right: 14px;
+    width: min(42%, 240px);
+    height: 154px;
+    overflow: hidden;
+    border-radius: var(--radius-small);
+    pointer-events: none;
+  }
+
+  .module-artifact canvas,
+  .module-artifact-fallback {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .module-artifact canvas {
+    opacity: 0;
+    transition: opacity 280ms var(--ease-out);
+  }
+
+  .module-artifact.is-three-ready canvas {
+    opacity: 1;
+  }
+
+  .module-artifact-fallback {
+    perspective: 420px;
+    transform-style: preserve-3d;
+    transition: opacity 180ms ease;
+  }
+
+  .module-artifact.is-three-ready .module-artifact-fallback {
+    opacity: 0;
+  }
+
+  .module-artifact-fallback i {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 104px;
+    height: 58px;
+    border: 1px solid rgb(215 255 79 / 0.42);
+    border-radius: 8px;
+    background: #242925;
+    box-shadow: 12px 14px 24px rgb(0 0 0 / 0.3);
+    transform-style: preserve-3d;
+  }
+
+  .module-artifact-fallback i:nth-child(1) {
+    transform: translate(-58%, -58%) rotateX(58deg) rotateZ(-28deg) translateZ(0);
+  }
+
+  .module-artifact-fallback i:nth-child(2) {
+    background: #343b34;
+    transform: translate(-50%, -50%) rotateX(58deg) rotateZ(-28deg) translateZ(20px);
+  }
+
+  .module-artifact-fallback i:nth-child(3) {
+    background: var(--signal);
+    transform: translate(-42%, -42%) rotateX(58deg) rotateZ(-28deg) translateZ(40px) scale(0.52);
+  }
+
+  @media (max-width: 680px) {
+    .module-artifact {
+      position: relative;
+      top: auto;
+      right: auto;
+      width: 100%;
+      height: 142px;
+      margin: 2px 0 18px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .module-artifact canvas,
+    .module-artifact-fallback {
+      transition: none;
+    }
+  }
+</style>

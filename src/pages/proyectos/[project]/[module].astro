@@ -1,0 +1,15 @@
+---
+import ModuleDetail from '@/components/ModuleDetail.astro';
+import { projects } from '@/data/content';
+
+export function getStaticPaths() {
+  return projects.flatMap((project) => project.modules.map((module) => ({
+    params: { project: project.slug, module: module.slug },
+    props: { project, module },
+  })));
+}
+
+const { project, module } = Astro.props;
+---
+
+<ModuleDetail locale="es" project={project} module={module} />

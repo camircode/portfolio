@@ -1,0 +1,232 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { technologies, projectPath, technologyPath, type Locale, type Project, type ProjectModule } from '@/data/content';
+import { moduleStories } from '@/data/stories';
+
+interface Props { locale: Locale; project: Project; module: ProjectModule }
+const { locale, project, module } = Astro.props;
+const isEs = locale === 'es';
+const base = isEs ? `/proyectos/${project.slug}` : `/en/projects/${project.slug}`;
+const canonicalPath = `${base}/${module.slug}/`;
+const alternatePath = isEs ? `/en/projects/${project.slug}/${module.slug}/` : `/proyectos/${project.slug}/${module.slug}/`;
+const moduleTechnologies = module.technologies.map((slug) => technologies.find((item) => item.slug === slug)).filter((item) => item !== undefined);
+const story = moduleStories[project.slug][module.slug];
+const portalDemo = project.slug === 'portal'
+  ? {
+      src: `/assets/projects/portal/demos/${module.slug}.mp4`,
+      poster: `/assets/projects/portal/demos/${module.slug}.png`,
+      note: isEs
+        ? 'Demostración recreada con Remotion a partir de la implementación real del Portal, con registros ficticios y sin conexión a producción. No reproduce por completo la interfaz ni la experiencia de usuario del Portal en producción.'
+        : 'Demo recreated with Remotion from the real Portal implementation, using fictional records and no production connection. It does not fully reproduce the production Portal’s interface or user experience.',
+    }
+  : null;
+const evidence = project.slug === '2free'
+  ? {
+      src: module.slug === 'mobile' ? '/assets/projects/2free/dashboard-mobile.png' : '/assets/projects/2free/dashboard-desktop.png',
+      alt: isEs ? 'Interfaz de demostración de 2 Free con datos ficticios.' : '2 Free demo interface with fictional data.',
+      note: isEs ? 'Captura real del modo invitado; no contiene datos personales.' : 'Real guest-mode capture with no personal data.',
+    }
+  : module.slug === 'estudio'
+    ? {
+        src: '/assets/projects/portal/guest-tracking.png',
+        alt: isEs ? 'Acceso público de seguimiento para clientes del Portal.' : 'Public customer tracking access in the Portal.',
+        note: isEs ? 'Pantalla pública capturada sin credenciales ni registros reales.' : 'Public screen captured without credentials or real records.',
+      }
+    : null;
+---
+
+<BaseLayout locale={locale} title={`${module.title[locale]} · ${project.title}`} description={module.detail[locale]} canonicalPath={canonicalPath} alternatePath={alternatePath}>
+  <article class="page-shell module-detail">
+    <a class="back-link" href={projectPath(project, locale)}>← {isEs ? 'Volver al sistema' : 'Back to system'} {project.title}</a>
+    <header transition:name={`${project.slug}-${module.slug}-module`}>
+      <p class="kicker">{project.title} / {module.summary[locale]}</p>
+      <h1>{module.title[locale]}</h1>
+      <p class="lead">{module.detail[locale]}</p>
+    </header>
+    <div class="flow-board" aria-label={isEs ? 'Flujo resumido del módulo' : 'Module flow summary'}>
+      {story.steps.map((step, index) => (
+        <div>
+          <span>{String(index + 1).padStart(2, '0')}</span>
+          <strong>{index === 0 ? (isEs ? 'Entrada' : 'Input') : index === 1 ? (isEs ? 'Proceso' : 'Process') : (isEs ? 'Resultado' : 'Outcome')}</strong>
+          <p>{step[locale]}</p>
+        </div>
+      ))}
+    </div>
+    {portalDemo && (
+      <figure class="module-evidence module-demo">
+        <video muted loop playsinline controls preload="metadata" poster={portalDemo.poster}>
+          <source src={portalDemo.src} type="video/mp4" />
+        </video>
+        <figcaption>{portalDemo.note}</figcaption>
+      </figure>
+    )}
+    {!portalDemo && evidence && (
+      <figure class="module-evidence">
+        <img src={evidence.src} alt={evidence.alt} loading="lazy" />
+        <figcaption>{evidence.note}</figcaption>
+      </figure>
+    )}
+    <section class="detail-section">
+      <h2>{isEs ? 'Cómo lo construí' : 'How I built it'}</h2>
+      <div>
+        <p>{story.implementation[locale]}</p>
+        <ul class="chip-list">
+          {moduleTechnologies.map((technology) => <li><a href={technologyPath(technology, locale)}>{technology.name}</a></li>)}
+        </ul>
+      </div>
+    </section>
+  </article>
+  <script is:inline data-astro-rerun>
+    const motionReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelectorAll('.module-demo video').forEach((video) => {
+      if (!(video instanceof HTMLVideoElement)) return;
+      if (motionReduced) video.pause();
+      else video.play().catch(() => undefined);
+    });
+  </script>
+</BaseLayout>
+
+<style>
+  .back-link {
+    display: inline-block;
+    margin-bottom: 64px;
+    color: var(--muted);
+  }
+
+  .module-detail > header {
+    max-width: 940px;
+  }
+
+  .module-detail h1 {
+    max-width: 14ch;
+    margin: 12px 0 28px;
+    font-family: var(--display);
+    font-size: clamp(4rem, 10vw, 7rem);
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    line-height: 0.88;
+  }
+
+  .flow-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+    gap: 18px;
+    margin-top: clamp(64px, 10vw, 130px);
+    padding: clamp(24px, 4vw, 48px);
+    border-radius: var(--radius);
+    background: var(--panel);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .flow-board div {
+    position: relative;
+    min-height: 180px;
+    padding: 20px;
+    border-radius: var(--radius-small);
+    background: var(--rack-deep);
+  }
+
+  .flow-board div + div::before {
+    position: absolute;
+    top: 50%;
+    left: -28px;
+    width: 36px;
+    height: 2px;
+    background: var(--signal);
+    content: '';
+  }
+
+  .flow-board div:nth-of-type(2) {
+    background: var(--signal);
+    color: var(--signal-ink);
+  }
+
+  .flow-board div:nth-of-type(2) p,
+  .flow-board div:nth-of-type(2) span {
+    color: #3b4226;
+  }
+
+  .flow-board span,
+  .flow-board strong {
+    display: block;
+  }
+
+  .flow-board span {
+    color: var(--signal);
+    font-size: 0.72rem;
+  }
+
+  .flow-board strong {
+    margin-top: 52px;
+    font-family: var(--display);
+    font-size: 1.8rem;
+    font-weight: 400;
+  }
+
+  .flow-board p {
+    margin: 6px 0 0;
+    color: var(--muted);
+  }
+
+  .module-evidence {
+    position: relative;
+    max-height: 760px;
+    margin: 18px 0 0;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--panel);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .module-evidence img {
+    width: 100%;
+    max-height: 760px;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  .module-evidence video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .module-evidence figcaption {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgb(8 9 9 / 0.88);
+    color: var(--muted);
+    font-size: 0.74rem;
+    line-height: 1.35;
+  }
+
+  .module-demo {
+    max-height: none;
+  }
+
+  .module-demo figcaption {
+    position: static;
+    padding: 10px 14px 12px;
+    border-radius: 0;
+    background: var(--rack-deep);
+  }
+
+  @media (max-width: 800px) {
+    .flow-board {
+      grid-template-columns: 1fr;
+    }
+
+    .flow-board div + div::before {
+      top: -24px;
+      left: 50%;
+      width: 2px;
+      height: 28px;
+    }
+  }
+</style>

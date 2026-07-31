@@ -1,0 +1,12 @@
+---
+import TechnologyDetail from '@/components/TechnologyDetail.astro';
+import { technologies } from '@/data/content';
+
+export function getStaticPaths() {
+  return technologies.map((technology) => ({ params: { slug: technology.slug }, props: { technology } }));
+}
+
+const { technology } = Astro.props;
+---
+
+<TechnologyDetail locale="es" technology={technology} />

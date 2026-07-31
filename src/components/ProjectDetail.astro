@@ -1,0 +1,237 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import BrandLogo from '@/components/BrandLogo.astro';
+import ModuleArtifact from '@/components/ModuleArtifact.astro';
+import { technologies, modulePath, technologyPath, type Locale, type Project } from '@/data/content';
+import { projectNarratives } from '@/data/stories';
+
+interface Props { locale: Locale; project: Project }
+const { locale, project } = Astro.props;
+const isEs = locale === 'es';
+const canonicalPath = isEs ? `/proyectos/${project.slug}/` : `/en/projects/${project.slug}/`;
+const alternatePath = isEs ? `/en/projects/${project.slug}/` : `/proyectos/${project.slug}/`;
+const liveUrl = project.slug === '2free' ? import.meta.env.PUBLIC_2FREE_URL?.trim() : '';
+const projectTechnologies = project.technologies
+  .map((slug) => technologies.find((item) => item.slug === slug))
+  .filter((item) => item !== undefined);
+const narrative = projectNarratives[project.slug];
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: project.title,
+  description: project.description[locale],
+  creator: { '@type': 'Person', name: 'Carlos Miranda' },
+  url: new URL(canonicalPath, 'https://camir.tech').toString(),
+};
+---
+
+<BaseLayout locale={locale} title={project.title} description={project.description[locale]} canonicalPath={canonicalPath} alternatePath={alternatePath} image={project.image}>
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
+  <article class="page-shell">
+    <header class="detail-hero" transition:name={`${project.slug}-card`}>
+      <div class="detail-copy">
+        <div>
+          <p class="kicker">{project.kicker[locale]} · {project.period}</p>
+          <h1>{project.title}</h1>
+          <p class="lead">{project.description[locale]}</p>
+        </div>
+        <div>
+          <p class="role"><span>{isEs ? 'Rol' : 'Role'}</span>{project.role[locale]}</p>
+          <div class="hero-actions">
+            {project.repository && <a class="button secondary" href={project.repository} target="_blank" rel="noreferrer"><BrandLogo name="github" /> GitHub</a>}
+            {liveUrl && <a class="button" href={liveUrl} target="_blank" rel="noreferrer">{isEs ? 'Abrir sitio' : 'Open live site'} ↗</a>}
+          </div>
+        </div>
+      </div>
+      <figure class="detail-media">
+        <img src={project.image} alt={project.imageAlt[locale]} loading="eager" />
+        {project.private && <figcaption>{isEs ? 'Pantalla pública actual. El contenido operativo permanece privado.' : 'Current public screen. Operational content remains private.'}</figcaption>}
+        {!project.private && <figcaption>{isEs ? 'Modo invitado con datos ficticios.' : 'Guest mode with fictional data.'}</figcaption>}
+      </figure>
+    </header>
+
+    <section class="project-narrative">
+      <div>
+        <p class="kicker">{isEs ? 'Contexto y evolución' : 'Context and evolution'}</p>
+        <h2>{isEs ? 'El sistema detrás de las pantallas.' : 'The system behind the screens.'}</h2>
+      </div>
+      <div class="narrative-copy">
+        {narrative.map((paragraph) => <p>{paragraph[locale]}</p>)}
+      </div>
+    </section>
+
+    <section class="detail-section">
+      <h2>{isEs ? 'Decisiones y resultados' : 'Decisions and outcomes'}</h2>
+      <div>
+        <ul>
+          {project.highlights.map((highlight) => <li>{highlight[locale]}</li>)}
+        </ul>
+        <ul class="chip-list">
+          {projectTechnologies.map((technology) => (
+            <li><a href={technologyPath(technology, locale)}>{technology.name}</a></li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <section class="modules-section" aria-labelledby="modules-title">
+      <header>
+        <p class="kicker">{isEs ? 'Mapa del sistema' : 'System map'}</p>
+        <h2 id="modules-title">{isEs ? 'Abre cada aplicación.' : 'Open every application.'}</h2>
+        <p>{isEs ? 'No son etiquetas: cada módulo conserva su propia ruta y contexto técnico.' : 'These are not labels: every module retains its own route and technical context.'}</p>
+      </header>
+      <ol class="module-grid">
+        {project.modules.map((module, index) => (
+          <li class="module-card" transition:name={`${project.slug}-${module.slug}-module`}>
+            <a href={modulePath(project, module, locale)}>
+              <span class="module-number">{String(index + 1).padStart(2, '0')}</span>
+              <ModuleArtifact project={project.slug} slug={module.slug} />
+              <div class="module-copy">
+                <h2>{module.title[locale]}</h2>
+                <p>{module.summary[locale]}</p>
+              </div>
+              <span class="card-link-label">{isEs ? 'Ver módulo' : 'View module'} <span aria-hidden="true">↗</span></span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .detail-media figcaption {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    max-width: 34ch;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgb(8 9 9 / 0.86);
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+
+  .project-narrative {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.42fr) 1fr;
+    gap: clamp(40px, 8vw, 140px);
+    padding-top: clamp(90px, 13vw, 170px);
+  }
+
+  .project-narrative h2 {
+    max-width: 10ch;
+    margin: 14px 0 0;
+    font-family: var(--display);
+    font-size: clamp(2.8rem, 5vw, 4.8rem);
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    line-height: 0.94;
+  }
+
+  .narrative-copy {
+    display: grid;
+    gap: 24px;
+  }
+
+  .narrative-copy p {
+    max-width: 72ch;
+    margin: 0;
+    color: var(--muted);
+    font-size: clamp(1.08rem, 1.6vw, 1.28rem);
+    line-height: 1.58;
+  }
+
+  .role {
+    display: grid;
+    margin: 42px 0 20px;
+    color: var(--muted);
+  }
+
+  .role span {
+    color: var(--signal);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+  }
+
+  .modules-section {
+    padding-top: clamp(90px, 13vw, 180px);
+  }
+
+  .modules-section > header {
+    display: grid;
+    grid-template-columns: 0.4fr 1fr;
+    gap: 18px clamp(32px, 8vw, 130px);
+    align-items: end;
+    margin-bottom: 46px;
+  }
+
+  .modules-section > header .kicker {
+    grid-row: span 2;
+  }
+
+  .modules-section > header h2 {
+    margin: 0;
+    font-family: var(--display);
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 400;
+    letter-spacing: -0.035em;
+    line-height: 0.9;
+  }
+
+  .modules-section > header p:last-child {
+    max-width: 52ch;
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .module-card a {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .module-number {
+    position: relative;
+    z-index: 2;
+    color: var(--signal);
+    font-size: 0.73rem;
+  }
+
+  .module-copy {
+    position: relative;
+    z-index: 2;
+    max-width: min(88%, 48ch);
+    margin-top: clamp(150px, 20vw, 210px);
+  }
+
+  .card-link-label {
+    position: relative;
+    z-index: 2;
+  }
+
+  @media (max-width: 680px) {
+    .project-narrative,
+    .modules-section > header {
+      grid-template-columns: 1fr;
+    }
+
+    .modules-section > header .kicker {
+      grid-row: auto;
+    }
+  }
+</style>
+
+<script>
+  import '@/scripts/module-artifacts';
+</script>

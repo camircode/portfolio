@@ -1,0 +1,454 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import BrandLogo from '@/components/BrandLogo.astro';
+import { site, type Locale } from '@/data/content';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const isEs = locale === 'es';
+const cv = isEs ? '/downloads/Carlos-Miranda-CV-es.pdf' : '/downloads/Carlos-Miranda-CV-en.pdf';
+const today = new Date();
+const experienceMonths = (today.getUTCFullYear() - 2025) * 12 + today.getUTCMonth() - 6;
+const experienceYears = Math.max(0, Math.floor(experienceMonths / 12));
+const experienceUnit = isEs
+  ? (experienceYears === 1 ? 'año de experiencia' : 'años de experiencia')
+  : (experienceYears === 1 ? 'year of experience' : 'years of experience');
+---
+
+<BaseLayout
+  locale={locale}
+  title={isEs ? 'Sobre mí' : 'About'}
+  description={isEs ? 'Perfil, experiencia y formación de Carlos Miranda, desarrollador de software y consultor DevOps.' : 'Profile, experience, and education of Carlos Miranda, software developer and DevOps consultant.'}
+  canonicalPath={isEs ? '/sobre-mi/' : '/en/about/'}
+  alternatePath={isEs ? '/en/about/' : '/sobre-mi/'}
+>
+  <article class="page-shell about-page">
+    <header transition:name="about-bay">
+      <div class="about-heading">
+        <h1 aria-label="Carlos Miranda"><span aria-hidden="true"><span class="name-signal" data-scramble-text="Ca">Ca</span><span data-scramble-text="rlos">rlos</span> <span class="name-signal" data-scramble-text="Mir">Mir</span><span data-scramble-text="anda">anda</span></span></h1>
+      </div>
+      <div class="about-intro">
+        <p class="lead">{isEs ? 'Soy desarrollador de software y consultor DevOps. Me interesa entender el sistema completo: la interfaz, el dominio, los datos, el despliegue y lo que ocurre cuando algo falla. Fuera del código disfruto el audio de alta fidelidad, los videojuegos, personalizar escritorios y gestores de ventanas, aprender sobre finanzas, el software libre y mantener servicios propios.' : 'I am a software developer and DevOps consultant. I care about understanding the complete system: interface, domain, data, deployment, and what happens when something fails. Beyond code, I enjoy high-fidelity audio, games, customizing desktops and window managers, learning about finance, free software, and running self-hosted services.'}</p>
+        <div class="about-actions">
+          <a class="button resume-button" href={cv} download><span class="action-icon download-icon" aria-hidden="true"></span>{isEs ? 'Descargar CV' : 'Download résumé'}</a>
+          <a class="button secondary" href={`mailto:${site.email}`}><span class="action-icon mail-icon" aria-hidden="true"></span>{isEs ? 'Correo' : 'Email'}</a>
+          <a class="button secondary" href={site.linkedin} target="_blank" rel="noreferrer"><BrandLogo name="linkedin" /> LinkedIn</a>
+          <a class="button secondary" href={site.github} target="_blank" rel="noreferrer"><BrandLogo name="github" /> GitHub</a>
+        </div>
+      </div>
+    </header>
+
+    <section class="timeline experience-timeline" aria-labelledby="experience-title">
+      <h2 id="experience-title">{isEs ? 'Experiencia' : 'Experience'}</h2>
+      <article class="organization-card">
+        <div class="organization-summary">
+          <div class="organization-brand">
+            <img src="/assets/logos/ferren.png" alt="" width="810" height="740" loading="lazy" />
+            <div>
+              <h3>FER&REN</h3>
+              <p>{isEs ? 'Julio de 2025 — actualidad' : 'July 2025 — present'}</p>
+            </div>
+          </div>
+          <div class="experience-total" aria-label={`${experienceYears} ${experienceUnit}`}>
+            <strong>{experienceYears}</strong>
+            <span>{experienceUnit}</span>
+          </div>
+        </div>
+        <ol class="role-list">
+          <li>
+            <time datetime="2026-01">{isEs ? 'Enero de 2026 — actualidad' : 'January 2026 — present'}</time>
+            <div><h4>{isEs ? 'Consultor DevOps a tiempo parcial' : 'Part-time DevOps Consultant'}</h4><p>{isEs ? 'Instauré infraestructura propia de alta disponibilidad, desplegué monitoreo en Go, migré aplicaciones Flutter a Astro, Preact y Tailwind CSS, y mantuve diez aplicaciones en producción.' : 'I established self-hosted high-availability infrastructure, deployed monitoring in Go, migrated Flutter applications to Astro, Preact, and Tailwind CSS, and maintained ten production applications.'}</p></div>
+          </li>
+          <li>
+            <time datetime="2025-07">{isEs ? 'Julio de 2025 — diciembre de 2025' : 'July 2025 — December 2025'}</time>
+            <div><h4>{isEs ? 'Desarrollador de sistemas' : 'Systems Developer'}</h4><p>{isEs ? 'Implementé cinco aplicaciones Flutter con Supabase para asistencia, cotización PPF, inventario PPF, registro de ventas e ingresos del estudio, y mantuve las aplicaciones en producción.' : 'I built five Flutter applications with Supabase for attendance, PPF quoting, PPF inventory, sales records, and studio income, and maintained the applications in production.'}</p></div>
+          </li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="timeline education-timeline" aria-labelledby="education-title">
+      <h2 id="education-title">{isEs ? 'Formación académica' : 'Education'}</h2>
+      <article class="education-card">
+        <div class="education-identity">
+          <span class="education-logo"><img src="/assets/logos/hybridge.png" alt="" width="512" height="512" loading="lazy" /></span>
+          <div><p class="status-label">Hybridge · {isEs ? 'Modalidad virtual' : 'Online'}</p><time>{isEs ? 'Cursando actualmente' : 'Currently enrolled'}</time></div>
+        </div>
+        <div><h3>{isEs ? 'Ingeniería en Software e Ingeniería en Inteligencia Artificial' : 'Software Engineering and Artificial Intelligence Engineering'}</h3><p>{isEs ? 'Curso simultáneamente ambas ingenierías.' : 'I am pursuing both engineering degrees concurrently.'}</p></div>
+      </article>
+      <article class="education-card">
+        <div class="education-identity">
+          <span class="education-logo"><img src="/assets/logos/cbt-san-pedro.png" alt="" width="637" height="515" loading="lazy" /></span>
+          <div><p class="status-label">CBT San Pedro Tlaltizapan</p><time datetime="2026-07-16">{isEs ? 'Graduación: 16 de julio de 2026' : 'Graduated: July 16, 2026'}</time></div>
+        </div>
+        <div><h3>{isEs ? 'Carrera Técnica de Técnico en Informática' : 'Technical Program in Information Technology'}</h3><p>{isEs ? 'Aprobé el examen profesional por unanimidad y con honores. Desarrollé software web y móvil con programación estructurada y orientada a objetos, almacenamiento persistente y administración de plataformas digitales.' : 'I passed the professional examination unanimously and with honors. I developed web and mobile software using structured and object-oriented programming, persistent storage, and digital platform administration.'}</p></div>
+      </article>
+    </section>
+
+    <section class="timeline certifications-timeline" aria-labelledby="certifications-title">
+      <h2 id="certifications-title">{isEs ? 'Cursos y certificaciones' : 'Courses and certifications'}</h2>
+      <article class="certificate-card">
+        <a class="certificate-preview" href="/downloads/Certificado-Curso-Propedeutico-CPFIA-2026.pdf" target="_blank" rel="noreferrer" aria-label={isEs ? 'Abrir certificado del curso propedéutico' : 'Open preparatory course certificate'}>
+          <img src="/assets/certificates/cpfia-propedeutico-2026.jpg" alt={isEs ? 'Constancia del curso propedéutico del Centro Público de Formación en Inteligencia Artificial' : 'Certificate for the Public Center for Artificial Intelligence Training preparatory course'} width="935" height="1210" loading="lazy" />
+        </a>
+        <div class="certificate-copy">
+          <p class="status-label">Tecnológico Nacional de México · MOOC</p>
+          <h3>{isEs ? 'Curso Propedéutico del Centro Público de Formación en Inteligencia Artificial' : 'Public Center for Artificial Intelligence Training Preparatory Course'}</h3>
+          <time datetime="2026-07-20">{isEs ? 'Constancia emitida el 20 de julio de 2026' : 'Certificate issued July 20, 2026'}</time>
+          <p>{isEs ? 'Curso masivo abierto en línea impartido a través de la plataforma MOOC del TecNM como parte del programa CPFIA del Gobierno de México.' : 'Massive open online course delivered through TecNM’s MOOC platform as part of the Mexican Government’s CPFIA program.'}</p>
+          <a class="button certificate-action" href="/downloads/Certificado-Curso-Propedeutico-CPFIA-2026.pdf" target="_blank" rel="noreferrer">{isEs ? 'Ver certificado' : 'View certificate'} <span aria-hidden="true">↗</span></a>
+        </div>
+      </article>
+    </section>
+  </article>
+</BaseLayout>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
+
+  gsap.registerPlugin(ScrambleTextPlugin);
+
+  declare global {
+    interface Window {
+      __aboutScrambleCleanup?: () => void;
+    }
+  }
+
+  function initializeAboutScramble() {
+    window.__aboutScrambleCleanup?.();
+    const parts = [...document.querySelectorAll<HTMLElement>('[data-scramble-text]')];
+    if (!parts.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const tweens = parts.map((part, index) => gsap.to(part, {
+      duration: 0.72,
+      delay: index * 0.07,
+      ease: 'none',
+      scrambleText: {
+        text: part.dataset.scrambleText ?? part.textContent ?? '',
+        chars: 'upperAndLowerCase',
+        revealDelay: 0.08,
+        speed: 0.55,
+      },
+    }));
+
+    window.__aboutScrambleCleanup = () => tweens.forEach((tween) => tween.kill());
+  }
+
+  document.addEventListener('astro:page-load', initializeAboutScramble);
+  document.addEventListener('astro:before-swap', () => window.__aboutScrambleCleanup?.());
+  initializeAboutScramble();
+</script>
+
+<style>
+  .about-page > header {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+    align-items: start;
+    gap: clamp(42px, 8vw, 130px);
+    min-height: min(68svh, 690px);
+    padding: clamp(42px, 7vw, 88px) 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .about-page h1 {
+    max-width: 8ch;
+    margin: 0;
+    font-family: var(--display);
+    font-size: clamp(4rem, 8vw, 6rem);
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    line-height: 0.88;
+  }
+
+  .about-page h1 .name-signal {
+    color: var(--signal);
+  }
+
+  .about-intro {
+    display: grid;
+    gap: 34px;
+    padding-bottom: 8px;
+  }
+
+  .about-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+  }
+
+  .about-actions .button {
+    justify-content: flex-start;
+  }
+
+  .action-icon {
+    width: 19px;
+    height: 19px;
+    flex: 0 0 auto;
+    background: currentColor;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+  }
+
+  .mail-icon {
+    mask-image: url('/assets/logos/mail.svg');
+  }
+
+  .download-icon {
+    mask-image: url('/assets/logos/software-download.svg');
+  }
+
+  .timeline {
+    padding: clamp(100px, 15vw, 190px) 0;
+  }
+
+  .timeline > h2 {
+    margin: 0 0 42px;
+    font-family: var(--display);
+    font-size: clamp(3rem, 6vw, 5rem);
+    font-weight: 400;
+  }
+
+  .timeline > article {
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--panel);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .organization-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 32px;
+    padding: clamp(28px, 4vw, 48px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .organization-brand {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-width: 0;
+  }
+
+  .organization-brand img {
+    width: 84px;
+    height: 72px;
+    object-fit: contain;
+  }
+
+  .organization-brand h3 {
+    margin: 0;
+    font-family: var(--display);
+    font-size: clamp(2.2rem, 5vw, 4.6rem);
+    font-weight: 400;
+    line-height: 0.9;
+  }
+
+  .organization-brand p {
+    margin: 10px 0 0;
+    color: var(--muted);
+  }
+
+  .experience-total {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    color: var(--signal);
+  }
+
+  .experience-total strong {
+    font-family: var(--display);
+    font-size: clamp(4.5rem, 9vw, 7rem);
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    line-height: 0.72;
+  }
+
+  .experience-total span {
+    max-width: 8ch;
+    line-height: 1.05;
+  }
+
+  .role-list {
+    margin: 0;
+    padding: 0 clamp(28px, 4vw, 48px);
+    list-style: none;
+  }
+
+  .role-list li {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.34fr) 1fr;
+    gap: clamp(24px, 5vw, 80px);
+    padding: 30px 0;
+  }
+
+  .role-list li + li {
+    border-top: 1px solid var(--line);
+  }
+
+  .timeline time,
+  .role-list time {
+    color: var(--signal);
+  }
+
+  .role-list h4,
+  .education-card h3 {
+    margin: 0 0 7px;
+    font-family: var(--display);
+    font-size: 1.8rem;
+    font-weight: 400;
+  }
+
+  .role-list p,
+  .education-card p {
+    max-width: 64ch;
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .education-timeline {
+    padding-top: 0;
+  }
+
+  .certifications-timeline {
+    padding-top: 0;
+  }
+
+  .education-timeline > article + article {
+    margin-top: 12px;
+  }
+
+  .education-card {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.55fr) 1fr;
+    align-items: center;
+    gap: clamp(34px, 7vw, 110px);
+    padding: clamp(28px, 4vw, 48px);
+  }
+
+  .education-identity {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .education-logo {
+    display: grid;
+    width: 92px;
+    height: 78px;
+    flex: 0 0 auto;
+    place-items: center;
+    overflow: hidden;
+    padding: 7px;
+    border-radius: var(--radius-small);
+    background: var(--ink);
+  }
+
+  .education-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .education-identity .status-label {
+    margin: 0 0 8px;
+  }
+
+  .education-identity time {
+    display: block;
+    color: var(--muted);
+  }
+
+  .certificate-card {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.58fr) 1fr;
+    align-items: stretch;
+  }
+
+  .certificate-preview {
+    min-height: 460px;
+    overflow: hidden;
+    background: var(--ink);
+  }
+
+  .certificate-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .certificate-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: clamp(30px, 5vw, 64px);
+  }
+
+  .certificate-copy .status-label {
+    margin: 0 0 22px;
+  }
+
+  .certificate-copy h3 {
+    max-width: 18ch;
+    margin: 0 0 18px;
+    font-family: var(--display);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+  }
+
+  .certificate-copy time {
+    color: var(--signal);
+  }
+
+  .certificate-copy > p:not(.status-label) {
+    max-width: 58ch;
+    margin: 18px 0 0;
+    color: var(--muted);
+  }
+
+  .certificate-action {
+    margin-top: 30px;
+  }
+
+  @media (max-width: 760px) {
+    .about-page > header,
+    .organization-summary,
+    .education-card,
+    .certificate-card {
+      grid-template-columns: 1fr;
+    }
+
+    .about-page > header {
+      min-height: auto;
+      padding: 34px 0 68px;
+    }
+
+    .about-actions .button:first-child {
+      width: 100%;
+    }
+
+    .experience-total {
+      justify-content: flex-start;
+    }
+
+    .role-list li {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .education-identity {
+      align-items: flex-start;
+    }
+
+    .certificate-preview {
+      min-height: 0;
+      aspect-ratio: 935 / 1210;
+    }
+  }
+</style>

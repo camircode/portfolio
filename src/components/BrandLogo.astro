@@ -1,0 +1,19 @@
+---
+interface Props {
+  name: 'github' | 'linkedin';
+}
+
+const { name } = Astro.props;
+const src = name === 'github' ? '/assets/logos/GitHub_dark.svg' : '/assets/logos/linkedin.svg';
+---
+
+<img src={src} alt="" aria-hidden="true" />
+
+<style>
+  img {
+    width: 1.05em;
+    height: 1.05em;
+    flex: 0 0 auto;
+    object-fit: contain;
+  }
+</style>

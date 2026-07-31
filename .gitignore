@@ -1,0 +1,44 @@
+# Build output
+dist/
+.astro/
+
+# Dependencies
+node_modules/
+
+# Test and generated reports
+coverage/
+playwright-report/
+test-results/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env*
+!.env.example
+
+# Editor and operating-system files
+.DS_Store
+.idea/
+.vscode/
+
+# Local AI and code-intelligence tooling
+.atl/
+.codegraph/
+.impeccable/
+AGENTS.md
+CLAUDE.md
+PRODUCT.md
+DESIGN.md
+
+# Source material not required by the deployed site
+/CV*.docx
+/Carlos_Miranda_CV.pdf
+/Certificado*.pdf
+/favicon/
+/hero.png
+/logos/
