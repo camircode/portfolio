@@ -39,6 +39,8 @@ DESIGN.md
 /CV*.docx
 /Accessible-MCS-*.docx
 /Carlos_Miranda_CV.pdf
+# Résumé PDFs exported by hand; the published copies live in public/downloads/
+/Carlos Emmanuel Mendiola Miranda*.pdf
 /Certificado*.pdf
 /favicon/
 /hero.png
