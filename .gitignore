@@ -37,6 +37,7 @@ DESIGN.md
 
 # Source material not required by the deployed site
 /CV*.docx
+/Accessible-MCS-*.docx
 /Carlos_Miranda_CV.pdf
 /Certificado*.pdf
 /favicon/
