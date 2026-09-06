@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from 'astro:transitions';
 import SectionNavigation from '@/components/SectionNavigation.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
 import '@/styles/global.css';
 import { site, type Locale } from '@/data/content';
 
@@ -13,6 +14,17 @@ interface Props {
   image?: string;
   noindex?: boolean;
   immersive?: boolean;
+  /**
+   * Open Graph object type. Project and article routes should pass 'article';
+   * everything else stays the default 'website'.
+   */
+  ogType?: 'website' | 'article';
+  /**
+   * Extra breadcrumb steps between the section and the current page, in order.
+   * A module page passes its project: [{ name: project.title, path: projectPath(...) }].
+   * Home and the section index are added automatically from canonicalPath.
+   */
+  breadcrumb?: readonly { name: string; path: string }[];
 }
 
 const {
@@ -24,6 +36,8 @@ const {
   image = '/assets/og/portfolio.png',
   noindex = false,
   immersive = false,
+  ogType = 'website',
+  breadcrumb = [],
 } = Astro.props;
 const description = providedDescription ?? site.description[locale];
 const pageTitle = title ? `${title} | ${site.name}` : `${site.name} | Software & DevOps`;
@@ -38,18 +52,56 @@ const personSchema = {
   image: new URL('/assets/hero.webp', site.domain).toString(),
   sameAs: [site.github, site.linkedin],
   jobTitle: locale === 'es' ? 'Desarrollador de software y consultor DevOps' : 'Software developer and DevOps consultant',
-  knowsAbout: ['Astro', 'TypeScript', 'Go', 'React', 'DevOps', 'PostgreSQL', 'Tauri', 'Self-hosting'],
+  knowsAbout: [
+    'Astro',
+    'TypeScript',
+    'Go',
+    'React',
+    'DevOps',
+    'PostgreSQL',
+    'Tauri',
+    'Self-hosting',
+    'Kubernetes',
+    'Terraform',
+    'Ansible',
+    'Jenkins',
+    'Argo CD',
+    'GitOps',
+    'Model Context Protocol',
+  ],
 };
+
+const homePath = locale === 'es' ? '/' : '/en/';
+const sectionPaths = locale === 'es'
+  ? [{ name: 'Sobre mí', path: '/sobre-mi/' }, { name: 'Proyectos', path: '/proyectos/' }, { name: 'Tecnologías', path: '/tecnologias/' }]
+  : [{ name: 'About', path: '/en/about/' }, { name: 'Projects', path: '/en/projects/' }, { name: 'Technologies', path: '/en/technologies/' }];
+const section = sectionPaths.find((entry) => canonicalPath.startsWith(entry.path) && canonicalPath !== entry.path);
+const breadcrumbTrail = immersive || !title
+  ? []
+  : [{ name: site.name, path: homePath }, ...(section ? [section] : []), ...breadcrumb, { name: title, path: canonicalPath }];
+const breadcrumbSchema = breadcrumbTrail.length > 1
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: breadcrumbTrail.map((entry, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: entry.name,
+        item: new URL(entry.path, site.domain).toString(),
+      })),
+    }
+  : null;
 ---
 
 <!doctype html>
-<html lang={locale}>
+<html lang={locale} data-immersive={immersive ? '' : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="theme-color" content="#080909" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#080909" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#e9ebe4" media="(prefers-color-scheme: light)" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="description" content={description} />
     <meta name="author" content={site.name} />
     <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'} />
@@ -59,7 +111,7 @@ const personSchema = {
     <link rel="alternate" hreflang="x-default" href={locale === 'es' ? canonical : alternate} />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
@@ -71,6 +123,64 @@ const personSchema = {
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+    {breadcrumbSchema && <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />}
+    <script is:inline data-astro-rerun>
+      (() => {
+        const KEY = 'camir-theme';
+        const COLOR = { dark: '#080909', light: '#e9ebe4' };
+        const root = document.documentElement;
+
+        const read = () => {
+          try {
+            const stored = localStorage.getItem(KEY);
+            return stored === 'light' || stored === 'dark' ? stored : null;
+          } catch {
+            return null;
+          }
+        };
+
+        const apply = () => {
+          const choice = read();
+          if (choice) root.setAttribute('data-theme', choice);
+          else root.removeAttribute('data-theme');
+          root.setAttribute('data-theme-ready', '');
+
+          document.querySelectorAll('meta[name="theme-color"]').forEach((meta, index) => {
+            const scheme = index === 0 ? 'dark' : 'light';
+            if (choice) {
+              meta.removeAttribute('media');
+              meta.setAttribute('content', COLOR[choice]);
+            } else {
+              meta.setAttribute('media', '(prefers-color-scheme: ' + scheme + ')');
+              meta.setAttribute('content', COLOR[scheme]);
+            }
+          });
+
+          /* Anything painting outside CSS — the home rack's WebGL scene — reads
+             its colours back from the tokens when this fires. */
+          document.dispatchEvent(new CustomEvent('camir:theme'));
+        };
+
+        apply();
+
+        if (!window.__camirThemeBound) {
+          window.__camirThemeBound = true;
+          const cycle = [null, 'light', 'dark'];
+          document.addEventListener('click', (event) => {
+            const target = event.target;
+            const toggle = target instanceof Element ? target.closest('[data-theme-toggle]') : null;
+            if (!toggle) return;
+            const next = cycle[(cycle.indexOf(read()) + 1) % cycle.length];
+            try {
+              if (next) localStorage.setItem(KEY, next);
+              else localStorage.removeItem(KEY);
+            } catch {}
+            apply();
+          });
+          document.addEventListener('astro:after-swap', apply);
+        }
+      })();
+    </script>
     <script is:inline data-astro-rerun>
       if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         document.documentElement.classList.add('reveal-ready');
@@ -83,7 +193,8 @@ const personSchema = {
   </head>
   <body class:list={{ 'immersive-page': immersive }}>
     <a class="skip-link" href="#main-content">{locale === 'es' ? 'Saltar al contenido' : 'Skip to content'}</a>
-    {!immersive && <SectionNavigation locale={locale} canonicalPath={canonicalPath} alternatePath={alternatePath} />}
+    {!immersive && <SiteHeader locale={locale} canonicalPath={canonicalPath} alternatePath={alternatePath} />}
+    {!immersive && <SectionNavigation locale={locale} canonicalPath={canonicalPath} />}
     <main id="main-content">
       <slot />
     </main>

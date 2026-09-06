@@ -77,18 +77,15 @@ const isEs = locale === 'es';
   }
 
   .index-card:nth-child(2) {
-    background: var(--signal);
+    background: var(--signal-fill);
     color: var(--signal-ink);
   }
 
   .index-card:nth-child(2) p,
   .index-card:nth-child(2) .status-label,
-  .index-card:nth-child(2) .card-link-label {
-    color: #313720;
-  }
-
+  .index-card:nth-child(2) .card-link-label,
   .index-card:nth-child(2) ul {
-    color: #394020;
+    color: var(--signal-ink-soft);
   }
 
   @media (max-width: 680px) {

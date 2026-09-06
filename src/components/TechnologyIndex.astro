@@ -5,6 +5,18 @@ import { technologyIndexEntries, technologyPath, type Locale } from '@/data/cont
 interface Props { locale: Locale }
 const { locale } = Astro.props;
 const isEs = locale === 'es';
+/*
+ * A technology without a mark of its own — Claude Code carries no Anthropic
+ * logo by choice, and a few tools ship no usable file — gets a typographic
+ * monogram instead of an image request that would 404.
+ */
+const monogram = (name: string) => name
+  .replace(/([a-z])([A-Z])/g, '$1 $2')
+  .split(/[\s-]+/)
+  .filter(Boolean)
+  .slice(0, 2)
+  .map((word) => word.charAt(0).toUpperCase())
+  .join('');
 ---
 
 <BaseLayout
@@ -19,22 +31,26 @@ const isEs = locale === 'es';
       <h1>{isEs ? 'Software con el que trabajo' : 'Software I work with'}</h1>
     </header>
     <ol class="technology-grid" transition:name="technologies-bay">
-      {technologyIndexEntries.map(({ technology, sourceIndex }) => (
-        <li class:list={['technology-card', { 'is-signal': sourceIndex % 2 === 0 }]} data-technology={technology.slug} transition:name={`technology-${technology.slug}`}>
-          <a href={technologyPath(technology, locale)}>
-            <picture>
-              <img src={sourceIndex % 2 === 0 ? technology.logo : (technology.logoOnDark ?? technology.logo)} alt="" loading="lazy" />
-            </picture>
-            <div>
-              <p class="status-label">{technology.category[locale]}</p>
-              <h2>{technology.name}</h2>
-              <p>{technology.summary[locale]}</p>
-              <p class="technology-purpose">{technology.purpose[locale]}</p>
-            </div>
-            <span class="card-link-label">{isEs ? 'Leer artículo' : 'Read article'} <span aria-hidden="true">↗</span></span>
-          </a>
-        </li>
-      ))}
+      {technologyIndexEntries.map(({ technology, sourceIndex }) => {
+        const onSignal = sourceIndex % 2 === 0;
+        const logo = onSignal ? technology.logo : (technology.logoOnDark ?? technology.logo);
+        return (
+          <li class:list={['technology-card', { 'is-signal': onSignal }]} data-technology={technology.slug} transition:name={`technology-${technology.slug}`}>
+            <a href={technologyPath(technology, locale)}>
+              {logo
+                ? <picture><img src={logo} alt="" width="46" height="46" loading="lazy" /></picture>
+                : <span class="technology-monogram" aria-hidden="true">{monogram(technology.name)}</span>}
+              <div>
+                <p class="status-label">{technology.category[locale]}</p>
+                <h2>{technology.name}</h2>
+                <p>{technology.summary[locale]}</p>
+                <p class="technology-purpose">{technology.purpose[locale]}</p>
+              </div>
+              <span class="card-link-label">{isEs ? 'Leer artículo' : 'Read article'} <span aria-hidden="true">↗</span></span>
+            </a>
+          </li>
+        );
+      })}
     </ol>
   </section>
 </BaseLayout>
@@ -55,14 +71,14 @@ const isEs = locale === 'es';
   }
 
   .technology-card.is-signal {
-    background: var(--signal);
+    background: var(--signal-fill);
     color: var(--signal-ink);
   }
 
   .technology-card.is-signal p,
   .technology-card.is-signal .status-label,
   .technology-card.is-signal .card-link-label {
-    color: #394020;
+    color: var(--signal-ink-soft);
   }
 
   .technology-card picture {
@@ -76,6 +92,16 @@ const isEs = locale === 'es';
     width: 100%;
     height: 100%;
     margin: 0;
+  }
+
+  .technology-monogram {
+    display: block;
+    height: 46px;
+    margin-bottom: 54px;
+    font-family: var(--display);
+    font-size: 2.5rem;
+    letter-spacing: -0.04em;
+    line-height: 46px;
   }
 
   .technology-card[data-technology='go'] picture {

@@ -9,6 +9,18 @@ const isEs = locale === 'es';
 const canonicalPath = isEs ? `/tecnologias/${technology.slug}/` : `/en/technologies/${technology.slug}/`;
 const alternatePath = isEs ? `/en/technologies/${technology.slug}/` : `/tecnologias/${technology.slug}/`;
 const relatedProjects = projects.filter((project) => technology.projects.includes(project.slug));
+/*
+ * A technology without a mark of its own — Claude Code carries no Anthropic
+ * logo by choice, and a few tools ship no usable file — puts a typographic
+ * monogram on the plate instead of an image request that would 404.
+ */
+const monogram = technology.name
+  .replace(/([a-z])([A-Z])/g, '$1 $2')
+  .split(/[\s-]+/)
+  .filter(Boolean)
+  .slice(0, 2)
+  .map((word) => word.charAt(0).toUpperCase())
+  .join('');
 const insight = technologyInsights[technology.slug];
 const articleSchema = {
   '@context': 'https://schema.org',
@@ -20,11 +32,15 @@ const articleSchema = {
 };
 ---
 
-<BaseLayout locale={locale} title={technology.name} description={technology.summary[locale]} canonicalPath={canonicalPath} alternatePath={alternatePath}>
+<BaseLayout locale={locale} title={technology.name} description={technology.summary[locale]} canonicalPath={canonicalPath} alternatePath={alternatePath} ogType="article">
   <script is:inline type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
   <article class="page-shell technology-article">
     <header transition:name={`technology-${technology.slug}`}>
-      <div class="technology-mark"><img src={technology.logo} alt="" /></div>
+      <div class="technology-mark">
+        {technology.logo
+          ? <img src={technology.logo} alt="" width="46" height="46" />
+          : <span class="technology-monogram" aria-hidden="true">{monogram}</span>}
+      </div>
       <div>
         <p class="kicker">{technology.category[locale]} · {isEs ? 'Tecnología en uso' : 'Technology in use'}</p>
         <h1>{technology.name}</h1>
@@ -76,14 +92,22 @@ const articleSchema = {
     aspect-ratio: 1;
     place-items: center;
     border-radius: var(--radius);
-    background: var(--signal);
+    background: var(--signal-fill);
     box-shadow: var(--shadow-panel);
+    color: var(--signal-ink);
   }
 
   .technology-mark img {
     width: 48%;
     max-height: 48%;
     object-fit: contain;
+  }
+
+  .technology-monogram {
+    font-family: var(--display);
+    font-size: clamp(4rem, 12vw, 9rem);
+    letter-spacing: -0.04em;
+    line-height: 1;
   }
 
   .technology-article h1 {

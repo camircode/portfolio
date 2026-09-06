@@ -14,24 +14,101 @@
   font-weight: 400;
 }
 
+/*
+ * Theme tokens are named by role, not by hue: a theme is a different set of
+ * token values, never a different set of rules.
+ *
+ * The dark rack is the base declaration and the fallback for browsers without
+ * light-dark(). The @supports block below turns every themed token into a
+ * light-dark(light, dark) pair, so the system preference resolves in CSS with
+ * no JavaScript; the toggle only switches the `color-scheme` on <html>.
+ */
 :root {
-  --rack-black: #080909;
-  --rack-deep: #0d0f0f;
+  --surface: #080909;
+  --surface-sunken: #0d0f0f;
   --panel: #171a19;
   --panel-high: #202321;
   --line: #343934;
+  --line-strong: #6e766d;
   --ink: #f2f1e9;
   --muted: #a7ada5;
   --signal: #d7ff4f;
+  --signal-fill: #d7ff4f;
   --signal-ink: #101306;
+  --signal-ink-soft: #394020;
   --danger: #ff766c;
-  --display: 'Array', 'Arial Black', sans-serif;
-  --body: 'Khand', 'Arial Narrow', sans-serif;
+  --chip: #292d2a;
+  /* The well is the one surface that stays light in both themes, so the ink on
+     it is a constant too: logos and scans come in dark-on-light variants. */
+  --image-well: #eef0e6;
+  --image-well-ink: #161915;
+  --rail-surface: rgb(13 15 15 / 0.92);
+  --scrim: rgb(8 9 9 / 0.86);
+  --scrim-ink: #d8ddd4;
+  --veil-top: #0b0d0c;
+  --veil-tint: rgb(215 255 79 / 0.055);
+  --shadow-panel: 0 22px 45px rgb(0 0 0 / 0.34), inset 0 1px rgb(255 255 255 / 0.045);
+  --shadow-rail: 0 18px 42px rgb(0 0 0 / 0.42);
+  --shadow-signal: 0 8px 24px rgb(215 255 79 / 0.2);
+
+  /* Legacy aliases: components still read the original rack names. */
+  --rack-black: var(--surface);
+  --rack-deep: var(--surface-sunken);
+
+  /* Khand and Array carry no arrow glyphs, and fontconfig answers U+2197 with
+     a colour emoji font before it reaches generic sans-serif — the rack's ↗
+     then paints as a blue emoji tile. Naming symbol families explicitly wins
+     that fallback on every platform. */
+  --symbols: 'Segoe UI Symbol', 'Apple Symbols', 'Noto Sans Symbols 2', 'DejaVu Sans';
+  --display: 'Array', 'Arial Black', var(--symbols), sans-serif;
+  --body: 'Khand', 'Arial Narrow', var(--symbols), sans-serif;
   --radius: 16px;
   --radius-small: 12px;
   --page: min(1500px, calc(100vw - 176px));
+  --header-height: 62px;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --shadow-panel: 0 22px 45px rgb(0 0 0 / 0.34), inset 0 1px rgb(255 255 255 / 0.045);
+}
+
+@supports (color: light-dark(#fff, #000)) {
+  :root {
+    --surface: light-dark(#e9ebe4, #080909);
+    --surface-sunken: light-dark(#dfe2d9, #0d0f0f);
+    --panel: light-dark(#f5f6f0, #171a19);
+    --panel-high: light-dark(#fdfdfa, #202321);
+    --line: light-dark(#c6cbbe, #343934);
+    --line-strong: light-dark(#6f7669, #6e766d);
+    --ink: light-dark(#161915, #f2f1e9);
+    --muted: light-dark(#4c5248, #a7ada5);
+    --signal: light-dark(#46520a, #d7ff4f);
+    --danger: light-dark(#8f2f24, #ff766c);
+    --chip: light-dark(#dde1d6, #292d2a);
+    --image-well: light-dark(#dfe2d9, #eef0e6);
+    --rail-surface: light-dark(rgb(245 246 240 / 0.94), rgb(13 15 15 / 0.92));
+    --veil-top: light-dark(#f1f3ea, #0b0d0c);
+    --veil-tint: light-dark(rgb(112 140 8 / 0.07), rgb(215 255 79 / 0.055));
+    --shadow-panel:
+      light-dark(0 16px 32px rgb(30 38 22 / 0.1), 0 22px 45px rgb(0 0 0 / 0.34)),
+      inset 0 1px light-dark(rgb(255 255 255 / 0.8), rgb(255 255 255 / 0.045));
+    --shadow-rail: light-dark(0 16px 34px rgb(30 38 22 / 0.18), 0 18px 42px rgb(0 0 0 / 0.42));
+    --shadow-signal: light-dark(0 8px 24px rgb(112 140 8 / 0.28), 0 8px 24px rgb(215 255 79 / 0.2));
+  }
+}
+
+/*
+ * `color-scheme` is the theme switch. No stored choice follows the system;
+ * data-theme is written by the inline head script in BaseLayout. Every route
+ * follows it, the immersive home included.
+ */
+:root {
+  color-scheme: light dark;
+}
+
+html[data-theme='light'] {
+  color-scheme: light;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 *,
@@ -41,21 +118,26 @@
 }
 
 html {
-  background: var(--rack-black);
+  background: var(--surface);
   color: var(--ink);
   font-family: var(--body);
   font-size: 18px;
   scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-height) + 16px);
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: var(--rack-black);
+  background: var(--surface);
   color: var(--ink);
   line-height: 1.45;
   text-rendering: optimizeLegibility;
+  /* The site's only pictographs are typographic arrows (↗ U+2197). Systems
+     that map them to a colour emoji font paint them as blue glyphs, which
+     reads as a foreign icon inside the rack. Force text presentation. */
+  font-variant-emoji: text;
 }
 
 .immersive-page {
@@ -67,8 +149,8 @@ body::before {
   z-index: -1;
   inset: 0;
   background:
-    radial-gradient(circle at 78% 6%, rgb(215 255 79 / 0.055), transparent 22rem),
-    linear-gradient(180deg, #0b0d0c 0%, var(--rack-black) 45%);
+    radial-gradient(circle at 78% 6%, var(--veil-tint), transparent 22rem),
+    linear-gradient(180deg, var(--veil-top) 0%, var(--surface) 45%);
   content: '';
   pointer-events: none;
 }
@@ -104,7 +186,7 @@ a {
 }
 
 ::selection {
-  background: var(--signal);
+  background: var(--signal-fill);
   color: var(--signal-ink);
 }
 
@@ -115,13 +197,26 @@ a {
   left: 10px;
   padding: 10px 16px;
   border-radius: 8px;
-  background: var(--signal);
+  background: var(--signal-fill);
   color: var(--signal-ink);
   transform: translateY(-150%);
 }
 
 .skip-link:focus {
+  box-shadow: 0 0 0 1px var(--signal), 0 12px 26px rgb(0 0 0 / 0.28);
   transform: translateY(0);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  margin: -1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .signal-link,
@@ -134,7 +229,7 @@ a {
   padding: 9px 17px;
   border: 0;
   border-radius: 999px;
-  background: var(--signal);
+  background: var(--signal-fill);
   color: var(--signal-ink);
   cursor: pointer;
   font-weight: 600;
@@ -144,12 +239,12 @@ a {
 
 .signal-link:hover,
 .button:hover {
-  box-shadow: 0 8px 24px rgb(215 255 79 / 0.2);
+  box-shadow: var(--shadow-signal);
   transform: translateY(-2px);
 }
 
 .button.secondary {
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   background: var(--panel-high);
   color: var(--ink);
 }
@@ -345,7 +440,7 @@ a {
 .detail-media {
   position: relative;
   min-height: 480px;
-  background: #eef0e6;
+  background: var(--image-well);
 }
 
 .detail-media img {
@@ -395,7 +490,7 @@ a {
   display: inline-flex;
   padding: 7px 12px;
   border-radius: 999px;
-  background: #292d2a;
+  background: var(--chip);
   color: var(--ink);
   font-size: 0.83rem;
 }
@@ -517,6 +612,7 @@ html.reveal-ready body:not(.immersive-page) :where(
   :root {
     --page: calc(100vw - 24px);
     --radius: 14px;
+    --header-height: 100px;
   }
 
   html {

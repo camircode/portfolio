@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 import hero from '@/assets/hero.png';
 import BrandLogo from '@/components/BrandLogo.astro';
-import { projects, site, technologies, type Locale } from '@/data/content';
+import { projectPath, projects, site, technologies, type Locale } from '@/data/content';
 
 interface Props {
   locale: Locale;
@@ -18,6 +18,23 @@ const paths = {
 };
 const technologyIconSlugs = ['html', 'css', 'astro', 'typescript', 'go', 'nodejs', 'docker', 'postgresql'];
 const technologyIcons = technologyIconSlugs
+  .map((slug) => technologies.find((technology) => technology.slug === slug))
+  .filter((technology) => technology !== undefined);
+
+/*
+ * The featured project owns its own bay, so the work bay lists the rest. The
+ * lookup is by the `featured` flag rather than by slug: whichever project
+ * carries the flag gets the 3D bay, and the fallback keeps the bay populated
+ * if the flag is ever dropped.
+ */
+const featuredProject = projects.find((project) => project.featured) ?? projects[0];
+const peerProjects = projects.filter((project) => project !== featuredProject);
+// The readout follows the path through the stack — hardware, orchestration,
+// provisioning, configuration, build, sync — and stops before it saturates the
+// bay. The rest of the stack is on the project page.
+const featuredStackSlugs = ['proxmox', 'kubernetes', 'terraform', 'ansible', 'jenkins', 'argocd'];
+const featuredStack = featuredStackSlugs
+  .filter((slug) => featuredProject.technologies.includes(slug))
   .map((slug) => technologies.find((technology) => technology.slug === slug))
   .filter((technology) => technology !== undefined);
 ---
@@ -64,10 +81,10 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
         <span aria-hidden="true">↗</span>
       </header>
       <div class="project-stack">
-        {projects.map((project, index) => (
-          <article class={`project-strip project-strip-${index + 1}`}>
-            <span>{project.period}</span>
+        {peerProjects.map((project) => (
+          <article class="project-strip">
             <h2>{project.title}</h2>
+            <span>{project.period}</span>
             <p>{project.summary[locale]}</p>
           </article>
         ))}
@@ -108,17 +125,23 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
       </div>
     </article>
 
-    <article class="rack-tile server-tile" data-rack-step="5" data-reveal-label={isEs ? '06 / Tocar para encender rack' : '06 / Touch to power the rack'} tabindex="0" aria-expanded="false">
+    <a class="rack-tile server-tile" data-rack-step="5" data-reveal-label={isEs ? '06 / Tocar para encender la infraestructura' : '06 / Touch to power the infrastructure'} href={projectPath(featuredProject, locale)} transition:name={`${featuredProject.slug}-card`} aria-expanded="false">
       <header>
-        <span class="status-label">{isEs ? 'Infraestructura' : 'Infrastructure'}</span>
-        <span class="server-health"><i></i>{isEs ? 'Operativa' : 'Operational'}</span>
+        <span class="status-label">{featuredProject.kicker[locale]}</span>
+        <span aria-hidden="true">↗</span>
       </header>
       <div class="server-fallback" aria-hidden="true">
         <i></i><i></i><i></i><i></i><i></i>
       </div>
       <canvas data-server-canvas aria-hidden="true"></canvas>
-      <p>{isEs ? 'Servicios web, datos y observabilidad en una misma topología.' : 'Web services, data, and observability in one topology.'}</p>
-    </article>
+      <div class="server-readout">
+        <h2>{featuredProject.title}</h2>
+        <p>{featuredProject.summary[locale]}</p>
+        <ul class="server-stack">
+          {featuredStack.map((technology) => <li>{technology.name}</li>)}
+        </ul>
+      </div>
+    </a>
 
     <aside class="rack-tile guide-tile">
       <div class="language-selector">
@@ -170,36 +193,108 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
     }
 
     const tile = canvas.closest<HTMLElement>('.server-tile');
+
+    /*
+     * The rack in the render is equipment standing in a room, so its metal and
+     * its lighting come from the theme rather than from six hex literals. The
+     * scene tokens hold light-dark() pairs, which only resolve on a real colour
+     * property, so a hidden probe carries each one through `color` and hands
+     * back the computed rgb(). The live status lights are read too, from
+     * --signal-fill, which is acid in both themes by design.
+     */
+    const tokenProbe = document.createElement('span');
+    tokenProbe.style.display = 'none';
+    (tile ?? canvas).append(tokenProbe);
+    const readColor = (token: string, fallback: string) => {
+      tokenProbe.style.color = `var(${token}, ${fallback})`;
+      const resolved = getComputedStyle(tokenProbe).color;
+      return resolved.startsWith('rgb') ? resolved : fallback;
+    };
+
     const scene = new Scene();
     const camera = new PerspectiveCamera(34, 1, 0.1, 100);
-    camera.position.set(3.2, 2.2, 5.8);
-    camera.lookAt(0, 0.3, 0);
+    camera.position.set(4.0, 2.7, 7.4);
+    camera.lookAt(0, 0, 0);
     const group = new Group();
+    group.position.x = -0.22;
     scene.add(group);
 
-    const frame = new Mesh(
-      new BoxGeometry(2.8, 3.6, 1.55),
-      new MeshStandardMaterial({ color: 0x20251f, roughness: 0.62, metalness: 0.58 }),
-    );
+    /*
+     * The bay is the homelab, so the rack is built as its topology rather than
+     * as seven identical slots: three control-plane members over two worker
+     * bays, a data pair joined by its replication link, and the observability
+     * bay standing outside the frame it watches.
+     */
+    const frameMaterial = new MeshStandardMaterial({ roughness: 0.62, metalness: 0.58 });
+    const frame = new Mesh(new BoxGeometry(2.8, 3.6, 1.55), frameMaterial);
     group.add(frame);
 
-    const bayMaterial = new MeshStandardMaterial({ color: 0x444d43, roughness: 0.35, metalness: 0.72 });
-    const lightMaterial = new MeshBasicMaterial({ color: 0xd7ff4f });
-    for (let index = 0; index < 7; index += 1) {
-      const bay = new Mesh(new BoxGeometry(2.45, 0.34, 0.11), bayMaterial);
-      bay.position.set(0, 1.35 - index * 0.45, 0.83);
+    const bayMaterial = new MeshStandardMaterial({ roughness: 0.35, metalness: 0.72 });
+    const nodeMaterial = new MeshStandardMaterial({ roughness: 0.3, metalness: 0.68 });
+    const lightMaterial = new MeshBasicMaterial();
+    const linkMaterial = new MeshStandardMaterial({ roughness: 0.4, metalness: 0.3 });
+    const addBay = (width: number, height: number, x: number, y: number, material: import('three').Material, lit: boolean) => {
+      const bay = new Mesh(new BoxGeometry(width, height, 0.11), material);
+      bay.position.set(x, y, 0.83);
       group.add(bay);
-      const light = new Mesh(new BoxGeometry(0.18, 0.055, 0.035), lightMaterial);
-      light.position.set(0.87, 1.35 - index * 0.45, 0.9);
+      if (!lit) return;
+      const light = new Mesh(new BoxGeometry(0.14, 0.05, 0.035), lightMaterial);
+      light.position.set(x + width / 2 - 0.16, y, 0.9);
       group.add(light);
-    }
+    };
 
-    scene.add(new AmbientLight(0xeaf3e8, 2.6));
-    const key = new DirectionalLight(0xd7ff4f, 4.4);
+    // Control plane: three members sharing etcd and one virtual address.
+    [-0.8, 0, 0.8].forEach((x) => addBay(0.72, 0.4, x, 1.36, nodeMaterial, true));
+    // Worker bays behind the Gateway.
+    addBay(2.45, 0.34, 0, 0.78, bayMaterial, true);
+    addBay(2.45, 0.34, 0, 0.36, bayMaterial, false);
+    // The primary and its streaming standby, with the replication link visible.
+    [-0.62, 0.62].forEach((x) => addBay(1.1, 0.42, x, -0.28, nodeMaterial, false));
+    const replication = new Mesh(new BoxGeometry(0.16, 0.06, 0.06), lightMaterial);
+    replication.position.set(0, -0.28, 0.9);
+    group.add(replication);
+    // Delivery: the Gateway plate the whole rack answers through.
+    addBay(2.45, 0.22, 0, -0.86, bayMaterial, true);
+
+    // Observability sits outside the cluster it watches, wired back to it.
+    const probe = new Mesh(new BoxGeometry(0.72, 0.56, 0.56), nodeMaterial);
+    probe.position.set(2.02, -1.24, 0.4);
+    group.add(probe);
+    const scrape = new Mesh(new BoxGeometry(1.15, 0.055, 0.055), linkMaterial);
+    scrape.position.set(1.42, -0.98, 0.62);
+    scrape.rotation.z = 0.46;
+    group.add(scrape);
+
+    const ambient = new AmbientLight(0xffffff, 2.6);
+    scene.add(ambient);
+    const key = new DirectionalLight(0xffffff, 4.4);
     key.position.set(3, 4, 5);
     scene.add(key);
 
+    const applyTheme = () => {
+      frameMaterial.color.setStyle(readColor('--scene-frame', '#20251f'));
+      bayMaterial.color.setStyle(readColor('--scene-bay', '#444d43'));
+      nodeMaterial.color.setStyle(readColor('--scene-node', '#5c6659'));
+      linkMaterial.color.setStyle(readColor('--scene-link', '#8fae2e'));
+      lightMaterial.color.setStyle(readColor('--signal-fill', '#d7ff4f'));
+      ambient.color.setStyle(readColor('--scene-ambient', '#eaf3e8'));
+      key.color.setStyle(readColor('--scene-key', '#d7ff4f'));
+      renderer.render(scene, camera);
+    };
+    applyTheme();
+
     let frameId = 0;
+    /*
+     * The canvas covers the whole bay, but the header and the readout sit on
+     * top of it. The rack is fitted to the band they leave free — measured, not
+     * assumed — so the control plane is never cropped off the top on a short
+     * viewport and the topology stays readable at every tile proportion.
+     */
+    const readout = tile?.querySelector<HTMLElement>('.server-readout');
+    const header = tile?.querySelector<HTMLElement>('header');
+    const viewHeight = 5.55; // world units spanning the canvas height at the rack
+    const rackHeight = 3.7;
+    const rackWidth = 4.1;
     const resize = () => {
       const width = canvas.clientWidth || 320;
       const height = canvas.clientHeight || 260;
@@ -207,6 +302,14 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
+
+      const topBand = (header?.offsetHeight ?? 24) + 22;
+      const bottomBand = readout?.offsetHeight ?? 150;
+      const free = Math.max(90, height - topBand - bottomBand);
+      const fitHeight = (viewHeight * (free / height)) / rackHeight;
+      const fitWidth = (viewHeight * camera.aspect) / rackWidth;
+      group.scale.setScalar(Math.min(1.05, Math.max(0.42, Math.min(fitHeight, fitWidth))));
+      group.position.y = (height / 2 - (topBand + free / 2)) * (viewHeight / height);
     };
     const render = (time = 0) => {
       if (!reducedMotion) group.rotation.y = -0.35 + Math.sin(time * 0.00035) * 0.12;
@@ -217,6 +320,14 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
       }
       if (!reducedMotion) frameId = requestAnimationFrame(render);
     };
+    /*
+     * A theme can change while the rack is on screen: the header toggle fires
+     * camir:theme, and the system preference moves on its own when nothing is
+     * stored. Both update the existing materials; nothing is rebuilt.
+     */
+    const schemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    schemeQuery.addEventListener('change', applyTheme);
+    document.addEventListener('camir:theme', applyTheme);
     const resizeObserver = new ResizeObserver(resize);
     const handleContextLost = (event: Event) => {
       event.preventDefault();
@@ -231,6 +342,9 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
     return () => {
       cancelAnimationFrame(frameId);
       resizeObserver.disconnect();
+      schemeQuery.removeEventListener('change', applyTheme);
+      document.removeEventListener('camir:theme', applyTheme);
+      tokenProbe.remove();
       canvas.removeEventListener('webglcontextlost', handleContextLost);
       delete canvas.dataset.serverReady;
       tile?.classList.remove('has-server-scene');
@@ -365,6 +479,33 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
     margin: 0;
     padding: 10px;
     overflow: hidden;
+
+    /*
+     * The WebGL rack's own palette, declared here so it moves with the theme
+     * like every other surface. Dark is the base declaration and the fallback
+     * for browsers without light-dark(), matching global.css. The live status
+     * lights are not here: they read --signal-fill and stay acid in both
+     * rooms.
+     */
+    --scene-frame: #20251f;
+    --scene-bay: #444d43;
+    --scene-node: #5c6659;
+    --scene-link: #8fae2e;
+    --scene-ambient: #eaf3e8;
+    --scene-key: #d7ff4f;
+  }
+
+  @supports (color: light-dark(#fff, #000)) {
+    .rack-home {
+      --scene-frame: light-dark(#6a7265, #20251f);
+      --scene-bay: light-dark(#848c7d, #444d43);
+      --scene-node: light-dark(#969e8e, #5c6659);
+      --scene-link: light-dark(#5e7318, #8fae2e);
+      --scene-ambient: light-dark(#f4f6ee, #eaf3e8);
+      /* The rack is raked by acid in the dark room and by daylight in the lit
+         one. Only the key changes: the status lights stay --signal-fill. */
+      --scene-key: light-dark(#fbfdf4, #d7ff4f);
+    }
   }
 
   .boot-screen {
@@ -374,7 +515,7 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
     display: none;
     place-content: center;
     gap: 20px;
-    background: var(--rack-black);
+    background: var(--surface);
     color: var(--muted);
     letter-spacing: 0.12em;
   }
@@ -414,7 +555,7 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
   }
 
   :global(.js) .rack-tile[data-rack-step]:not(.is-revealed) {
-    background: var(--rack-deep);
+    background: var(--surface-sunken);
     box-shadow: inset 0 0 0 1px var(--line);
   }
 
@@ -454,18 +595,20 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
   }
 
   :global(.js) .rack-tile[data-rack-step].is-active:not(.is-revealed) {
-    box-shadow: inset 0 0 0 2px var(--signal), 0 18px 34px rgb(0 0 0 / 0.38);
+    box-shadow: inset 0 0 0 2px var(--signal), var(--shadow-rail);
   }
 
   :global(.js) .rack-tile[data-rack-step].is-active:not(.is-revealed)::after {
     background: var(--signal);
-    box-shadow: 0 0 0 5px rgb(215 255 79 / 0.12);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--signal) 16%, transparent);
   }
 
+  /* The plate, not the mark: the portrait bay is acid in both rooms and every
+     glyph on it is --signal-ink. */
   .portrait-tile {
     grid-column: 1 / 5;
     grid-row: 1 / 5;
-    background: #d7ff4f;
+    background: var(--signal-fill);
     color: var(--signal-ink);
   }
 
@@ -473,7 +616,7 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
     position: absolute;
     inset: auto 0 0;
     height: 54%;
-    background: linear-gradient(transparent, rgb(215 255 79 / 0.94) 70%);
+    background: linear-gradient(transparent, color-mix(in srgb, var(--signal-fill) 94%, transparent) 70%);
     content: '';
   }
 
@@ -525,65 +668,68 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
     justify-content: space-between;
   }
 
+  /*
+   * Four peer projects, ruled as equals: same type size, same weight, one
+   * hairline between them and no plate colouring one above another. The
+   * featured project is not in this list; it has the bay next door.
+   */
   .project-stack {
-    position: relative;
+    display: flex;
     flex: 1;
-    margin-top: 18px;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 14px;
   }
 
   .project-strip {
-    position: absolute;
-    right: 0;
-    left: 0;
-    min-height: 48%;
-    padding: 18px 20px;
-    border-radius: var(--radius-small);
-    color: var(--rack-black);
-    transition: transform 280ms var(--ease-out);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 3px 12px;
+    padding: 9px 0;
+    transition: transform 320ms var(--ease-out);
   }
 
-  .project-strip-1 {
-    z-index: 1;
-    top: 0;
-    background: var(--ink);
-    transform: rotate(-1.7deg);
-  }
-
-  .project-strip-2 {
-    z-index: 2;
-    bottom: 0;
-    background: var(--signal);
-    color: var(--signal-ink);
-    transform: translateX(7%) rotate(1.4deg);
-  }
-
-  .projects-tile:hover .project-strip-1 {
-    transform: translateY(-6px) rotate(-2.5deg);
-  }
-
-  .projects-tile:hover .project-strip-2 {
-    transform: translateX(3%) translateY(5px) rotate(0.5deg);
-  }
-
-  .project-strip span {
-    float: right;
-    font-size: 0.68rem;
+  .project-strip + .project-strip {
+    border-top: 1px solid var(--line);
   }
 
   .project-strip h2 {
-    margin: 0 0 4px;
+    margin: 0;
     font-family: var(--display);
-    font-size: clamp(1.45rem, 2.7vw, 2.4rem);
+    font-size: clamp(1.05rem, 1.7vw, 1.5rem);
     font-weight: 400;
     line-height: 1;
   }
 
-  .project-strip p {
-    max-width: 34ch;
-    margin: 0;
-    font-size: 0.73rem;
-    line-height: 1.25;
+  .project-strip span {
+    color: var(--muted);
+    font-size: 0.64rem;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
   }
+
+  .project-strip p {
+    display: -webkit-box;
+    overflow: hidden;
+    grid-column: 1 / -1;
+    max-width: 40ch;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.68rem;
+    line-height: 1.2;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .projects-tile:hover .project-strip,
+  .projects-tile:focus-visible .project-strip {
+    transform: translateX(6px);
+  }
+
+  .projects-tile .project-strip:nth-child(2) { transition-delay: 40ms; }
+  .projects-tile .project-strip:nth-child(3) { transition-delay: 80ms; }
+  .projects-tile .project-strip:nth-child(4) { transition-delay: 120ms; }
 
   .technologies-tile {
     grid-column: 10 / 13;
@@ -592,8 +738,13 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
     flex-direction: column;
     justify-content: flex-end;
     padding: 22px;
-    background: var(--ink);
-    color: var(--rack-black);
+    /*
+     * The one tray of paper in the rack, and the only bay that does not invert:
+     * the eight marks are the dark-on-light logo variants, so the well stays
+     * light in both themes and carries --image-well-ink.
+     */
+    background: var(--image-well);
+    color: var(--image-well-ink);
   }
 
   .technologies-link {
@@ -718,19 +869,27 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
     mask-image: url('/assets/logos/software-download.svg');
   }
 
+  /*
+   * The featured project's bay. It is the only tile where the render runs edge
+   * to edge, which is how the homelab reads as the one system you can watch
+   * running rather than a fifth entry in a list.
+   */
   .server-tile {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     grid-column: 8 / 11;
     grid-row: 4 / 7;
     padding: 20px;
-    background: #101311;
+    background: var(--surface-sunken);
   }
 
   .server-tile canvas,
   .server-fallback {
     position: absolute;
-    inset: 44px 0 30px;
+    inset: 0;
     width: 100%;
-    height: calc(100% - 74px);
+    height: 100%;
   }
 
   .server-tile canvas {
@@ -743,7 +902,7 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
     display: grid;
     align-content: center;
     gap: 7px;
-    padding: 30px 24%;
+    padding: 22% 26% 42%;
     opacity: 1;
     transition: opacity 220ms ease;
   }
@@ -757,36 +916,66 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
   }
 
   .server-fallback i {
-    height: 16px;
+    height: 14px;
     border-radius: 3px;
-    background: #2b302c;
+    background: var(--chip);
     box-shadow: inset -8px 0 var(--signal);
   }
 
-  .server-tile p {
-    position: absolute;
+  .server-tile header {
+    color: var(--muted);
+  }
+
+  .server-tile .status-label {
+    max-width: 22ch;
+    line-height: 1.15;
+  }
+
+  /* A legibility scrim, not a decorative gradient: the readout sits on the
+     render and has to hold 4.5:1 against it. */
+  .server-readout {
+    position: relative;
     z-index: 2;
-    right: 18px;
-    bottom: 14px;
-    left: 18px;
-    margin: 0;
+    margin: 0 -20px -20px;
+    padding: 52px 20px 20px;
+    background: linear-gradient(transparent 0, var(--surface-sunken) 50px);
+  }
+
+  .server-readout h2 {
+    margin: 0 0 5px;
+    font-family: var(--display);
+    font-size: clamp(1.3rem, 2.3vw, 2rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+  }
+
+  .server-readout p {
+    max-width: 32ch;
+    margin: 0 0 11px;
     color: var(--muted);
     font-size: 0.68rem;
+    line-height: 1.2;
   }
 
-  .server-health {
+  .server-stack {
     display: flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--muted);
-    font-size: 0.72rem;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
-  .server-health i {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--signal);
+  .server-stack li {
+    padding: 3px 9px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    line-height: 1.25;
+    white-space: nowrap;
   }
 
   .guide-tile {
@@ -796,7 +985,7 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
     flex-direction: column;
     justify-content: center;
     padding: 20px;
-    background: var(--signal);
+    background: var(--signal-fill);
     color: var(--signal-ink);
   }
 
@@ -832,9 +1021,15 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
     border-left: 1px solid rgb(8 9 9 / 0.3);
   }
 
+  /* The ring is a mark, and on the acid plate the mark is the ink: --signal is
+     the plate's own colour in the dark room, so it would land invisible. */
+  .guide-tile :focus-visible {
+    outline-color: var(--signal-ink);
+  }
+
   .language-selector a[aria-current='page'] {
     background: var(--signal-ink);
-    color: var(--signal);
+    color: var(--signal-fill);
   }
 
   .language-selector a:not([aria-current='page']):hover,
@@ -918,8 +1113,12 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
     }
 
     .server-tile {
-      min-height: 360px;
+      min-height: 430px;
       order: 7;
+    }
+
+    .server-fallback {
+      padding: 26% 22% 46%;
     }
 
     .contact-tile {
@@ -973,6 +1172,30 @@ FORM: Pinned asymmetric bento reference, translated into an interactive Experien
 
     .technologies-tile strong {
       font-size: clamp(3rem, 9vh, 5.2rem);
+    }
+
+    .project-strip {
+      padding: 6px 0;
+    }
+
+    .project-strip p {
+      -webkit-line-clamp: 1;
+    }
+
+    .server-readout {
+      padding-top: 30px;
+    }
+
+    .server-readout p {
+      display: -webkit-box;
+      overflow: hidden;
+      margin-bottom: 8px;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    .server-stack li:nth-child(n + 5) {
+      display: none;
     }
   }
 

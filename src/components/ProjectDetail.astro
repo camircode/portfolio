@@ -10,7 +10,14 @@ const { locale, project } = Astro.props;
 const isEs = locale === 'es';
 const canonicalPath = isEs ? `/proyectos/${project.slug}/` : `/en/projects/${project.slug}/`;
 const alternatePath = isEs ? `/en/projects/${project.slug}/` : `/proyectos/${project.slug}/`;
-const liveUrl = project.slug === '2free' ? import.meta.env.PUBLIC_2FREE_URL?.trim() : '';
+/*
+ * Every published project carries its own liveUrl. 2 Free is the exception the
+ * product rule names: its landing is only announced through PUBLIC_2FREE_URL,
+ * so an unset variable hides the action instead of falling back to the data.
+ */
+const liveUrl = project.slug === '2free'
+  ? import.meta.env.PUBLIC_2FREE_URL?.trim()
+  : project.liveUrl;
 const projectTechnologies = project.technologies
   .map((slug) => technologies.find((item) => item.slug === slug))
   .filter((item) => item !== undefined);
@@ -25,7 +32,7 @@ const schema = {
 };
 ---
 
-<BaseLayout locale={locale} title={project.title} description={project.description[locale]} canonicalPath={canonicalPath} alternatePath={alternatePath} image={project.image}>
+<BaseLayout locale={locale} title={project.title} description={project.description[locale]} canonicalPath={canonicalPath} alternatePath={alternatePath} image={project.image} ogType="article">
   <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
   <article class="page-shell">
     <header class="detail-hero" transition:name={`${project.slug}-card`}>
@@ -44,9 +51,8 @@ const schema = {
         </div>
       </div>
       <figure class="detail-media">
-        <img src={project.image} alt={project.imageAlt[locale]} loading="eager" />
-        {project.private && <figcaption>{isEs ? 'Pantalla pública actual. El contenido operativo permanece privado.' : 'Current public screen. Operational content remains private.'}</figcaption>}
-        {!project.private && <figcaption>{isEs ? 'Modo invitado con datos ficticios.' : 'Guest mode with fictional data.'}</figcaption>}
+        <img src={project.image} alt="" loading="eager" />
+        <figcaption>{project.imageAlt[locale]}</figcaption>
       </figure>
     </header>
 
@@ -107,9 +113,10 @@ const schema = {
     max-width: 34ch;
     padding: 8px 12px;
     border-radius: 8px;
-    background: rgb(8 9 9 / 0.86);
-    color: var(--muted);
+    background: var(--scrim);
+    color: var(--scrim-ink);
     font-size: 0.72rem;
+    line-height: 1.3;
   }
 
   .project-narrative {

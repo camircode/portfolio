@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import BrandLogo from '@/components/BrandLogo.astro';
-import { site, type Locale } from '@/data/content';
+import { projectPath, projects, site, type Locale, type Project } from '@/data/content';
 
 interface Props { locale: Locale }
 const { locale } = Astro.props;
@@ -13,6 +13,68 @@ const experienceYears = Math.max(0, Math.floor(experienceMonths / 12));
 const experienceUnit = isEs
   ? (experienceYears === 1 ? 'año de experiencia' : 'años de experiencia')
   : (experienceYears === 1 ? 'year of experience' : 'years of experience');
+
+// The projects Carlos owns end to end. Portal and the Detailing landing are
+// FER&REN work and belong to the role entries above them, not here.
+const independentSlugs: readonly Project['slug'][] = ['infraestructura', 'pokedex', '2free'];
+const independentProjects = independentSlugs
+  .map((slug) => projects.find((project) => project.slug === slug))
+  .filter((project) => project !== undefined);
+// `<time>` only accepts a single date, so a range renders as plain text.
+const yearAttribute = (period: string) => (/^\d{4}$/.test(period) ? period : undefined);
+
+const certificates = [
+  {
+    slug: 'hybridge-claude-code',
+    issuer: isEs ? 'Hybridge · Curso en línea' : 'Hybridge · Online course',
+    mark: '/assets/logos/hybridge.png',
+    title: isEs ? 'Uso y dominio de Claude Code' : 'Use and command of Claude Code',
+    datetime: '2026-09-04',
+    issued: isEs ? 'Constancia emitida el 4 de septiembre de 2026' : 'Certificate issued September 4, 2026',
+    body: isEs
+      ? 'Forma parte de mi método de trabajo. Delego exploración, cambios acotados y verificación, y reviso el resultado como se revisa un pull request.'
+      : 'It is part of how I work. I delegate exploration, bounded changes, and verification, then review the result the way a pull request is reviewed.',
+    file: '/downloads/Certificado-Hybridge-Claude-Code-2026.pdf',
+    preview: '/assets/certificates/hybridge-claude-code-2026.jpg',
+    width: 1200,
+    height: 849,
+    alt: isEs ? 'Constancia de Hybridge en uso y dominio de Claude Code' : 'Hybridge certificate in the use and command of Claude Code',
+  },
+  {
+    slug: 'hybridge-git-github',
+    issuer: isEs ? 'Hybridge · Curso en línea' : 'Hybridge · Online course',
+    mark: '/assets/logos/hybridge.png',
+    title: isEs ? 'Uso y dominio de Git y GitHub' : 'Use and command of Git and GitHub',
+    datetime: '2026-09-04',
+    issued: isEs ? 'Constancia emitida el 4 de septiembre de 2026' : 'Certificate issued September 4, 2026',
+    body: isEs
+      ? 'Git guarda el historial de los cinco proyectos de este portfolio, y en el homelab un commit al repositorio gitops es el mecanismo de despliegue.'
+      : 'Git holds the history of the five projects in this portfolio, and in the homelab a commit to the gitops repository is the deployment mechanism.',
+    file: '/downloads/Certificado-Hybridge-Git-GitHub-2026.pdf',
+    preview: '/assets/certificates/hybridge-git-github-2026.jpg',
+    width: 1200,
+    height: 849,
+    alt: isEs ? 'Constancia de Hybridge en uso y dominio de Git y GitHub' : 'Hybridge certificate in the use and command of Git and GitHub',
+  },
+  {
+    slug: 'cpfia-propedeutico',
+    issuer: 'Tecnológico Nacional de México · MOOC',
+    mark: undefined,
+    title: isEs ? 'Curso Propedéutico del Centro Público de Formación en Inteligencia Artificial' : 'Public Center for Artificial Intelligence Training Preparatory Course',
+    datetime: '2026-07-20',
+    issued: isEs ? 'Constancia emitida el 20 de julio de 2026' : 'Certificate issued July 20, 2026',
+    body: isEs
+      ? 'Curso masivo abierto en línea impartido a través de la plataforma MOOC del TecNM como parte del programa CPFIA del Gobierno de México.'
+      : 'Massive open online course delivered through TecNM’s MOOC platform as part of the Mexican Government’s CPFIA program.',
+    file: '/downloads/Certificado-Curso-Propedeutico-CPFIA-2026.pdf',
+    preview: '/assets/certificates/cpfia-propedeutico-2026.jpg',
+    width: 935,
+    height: 1210,
+    alt: isEs
+      ? 'Constancia del curso propedéutico del Centro Público de Formación en Inteligencia Artificial'
+      : 'Certificate for the Public Center for Artificial Intelligence Training preparatory course',
+  },
+];
 ---
 
 <BaseLayout
@@ -57,12 +119,29 @@ const experienceUnit = isEs
         <ol class="role-list">
           <li>
             <time datetime="2026-01">{isEs ? 'Enero de 2026 — actualidad' : 'January 2026 — present'}</time>
-            <div><h4>{isEs ? 'Consultor DevOps a tiempo parcial' : 'Part-time DevOps Consultant'}</h4><p>{isEs ? 'Instauré infraestructura propia de alta disponibilidad, desplegué monitoreo en Go, migré aplicaciones Flutter a Astro, Preact y Tailwind CSS, y mantuve diez aplicaciones en producción.' : 'I established self-hosted high-availability infrastructure, deployed monitoring in Go, migrated Flutter applications to Astro, Preact, and Tailwind CSS, and maintained ten production applications.'}</p></div>
+            <div><h4>{isEs ? 'Consultor DevOps a tiempo parcial' : 'Part-time DevOps Consultant'}</h4><p>{isEs ? 'Instauré infraestructura propia de alta disponibilidad, desplegué monitoreo en Go, migré aplicaciones Flutter a Astro, Preact y Tailwind CSS, y mantuve diez aplicaciones en producción. También publiqué la landing del estudio, con diecinueve páginas de servicio que abren WhatsApp con el mensaje ya escrito.' : 'I established self-hosted high-availability infrastructure, deployed monitoring in Go, migrated Flutter applications to Astro, Preact, and Tailwind CSS, and maintained ten production applications. I also shipped the studio’s landing page, with nineteen service pages that open WhatsApp with the message already written.'}</p></div>
           </li>
           <li>
             <time datetime="2025-07">{isEs ? 'Julio de 2025 — diciembre de 2025' : 'July 2025 — December 2025'}</time>
             <div><h4>{isEs ? 'Desarrollador de sistemas' : 'Systems Developer'}</h4><p>{isEs ? 'Implementé cinco aplicaciones Flutter con Supabase para asistencia, cotización PPF, inventario PPF, registro de ventas e ingresos del estudio, y mantuve las aplicaciones en producción.' : 'I built five Flutter applications with Supabase for attendance, PPF quoting, PPF inventory, sales records, and studio income, and maintained the applications in production.'}</p></div>
           </li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="timeline independent-timeline" aria-labelledby="independent-title">
+      <h2 id="independent-title">{isEs ? 'Trabajo independiente' : 'Independent work'}</h2>
+      <article class="organization-card">
+        <ol class="role-list">
+          {independentProjects.map((project) => (
+            <li>
+              <time datetime={yearAttribute(project.period)}>{project.period}</time>
+              <div>
+                <h4><a href={projectPath(project, locale)}>{project.title} <span aria-hidden="true">↗</span></a></h4>
+                <p>{project.summary[locale]}</p>
+              </div>
+            </li>
+          ))}
         </ol>
       </article>
     </section>
@@ -87,38 +166,55 @@ const experienceUnit = isEs
 
     <section class="timeline certifications-timeline" aria-labelledby="certifications-title">
       <h2 id="certifications-title">{isEs ? 'Cursos y certificaciones' : 'Courses and certifications'}</h2>
-      <article class="certificate-card">
-        <a class="certificate-preview" href="/downloads/Certificado-Curso-Propedeutico-CPFIA-2026.pdf" target="_blank" rel="noreferrer" aria-label={isEs ? 'Abrir certificado del curso propedéutico' : 'Open preparatory course certificate'}>
-          <img src="/assets/certificates/cpfia-propedeutico-2026.jpg" alt={isEs ? 'Constancia del curso propedéutico del Centro Público de Formación en Inteligencia Artificial' : 'Certificate for the Public Center for Artificial Intelligence Training preparatory course'} width="935" height="1210" loading="lazy" />
-        </a>
-        <div class="certificate-copy">
-          <p class="status-label">Tecnológico Nacional de México · MOOC</p>
-          <h3>{isEs ? 'Curso Propedéutico del Centro Público de Formación en Inteligencia Artificial' : 'Public Center for Artificial Intelligence Training Preparatory Course'}</h3>
-          <time datetime="2026-07-20">{isEs ? 'Constancia emitida el 20 de julio de 2026' : 'Certificate issued July 20, 2026'}</time>
-          <p>{isEs ? 'Curso masivo abierto en línea impartido a través de la plataforma MOOC del TecNM como parte del programa CPFIA del Gobierno de México.' : 'Massive open online course delivered through TecNM’s MOOC platform as part of the Mexican Government’s CPFIA program.'}</p>
-          <a class="button certificate-action" href="/downloads/Certificado-Curso-Propedeutico-CPFIA-2026.pdf" target="_blank" rel="noreferrer">{isEs ? 'Ver certificado' : 'View certificate'} <span aria-hidden="true">↗</span></a>
-        </div>
-      </article>
+      {certificates.map((certificate) => (
+        <article class="certificate-card">
+          <a class="certificate-preview" href={certificate.file} target="_blank" rel="noreferrer" aria-label={certificate.alt}>
+            <img src={certificate.preview} alt="" width={certificate.width} height={certificate.height} loading="lazy" />
+          </a>
+          <div class="certificate-copy">
+            <p class="status-label certificate-issuer">
+              {certificate.mark && <span class="certificate-mark"><img src={certificate.mark} alt="" width="512" height="512" loading="lazy" /></span>}
+              {certificate.issuer}
+            </p>
+            <h3>{certificate.title}</h3>
+            <time datetime={certificate.datetime}>{certificate.issued}</time>
+            <p>{certificate.body}</p>
+            <a class="button certificate-action" href={certificate.file} target="_blank" rel="noreferrer">{isEs ? 'Ver certificado' : 'View certificate'} <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+      ))}
     </section>
   </article>
 </BaseLayout>
 
 <script>
-  import gsap from 'gsap';
-  import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
-
-  gsap.registerPlugin(ScrambleTextPlugin);
-
   declare global {
     interface Window {
       __aboutScrambleCleanup?: () => void;
     }
   }
 
-  function initializeAboutScramble() {
+  /*
+   * GSAP and ScrambleTextPlugin are imported dynamically, after the
+   * reduced-motion check: a static import put ~70 KB of animation engine in the
+   * initial module graph of this page for every visitor, including the ones who
+   * had already asked for no motion. Same contract HomeBento uses for three.js.
+   */
+  let generation = 0;
+
+  async function initializeAboutScramble() {
     window.__aboutScrambleCleanup?.();
+    const token = (generation += 1);
     const parts = [...document.querySelectorAll<HTMLElement>('[data-scramble-text]')];
     if (!parts.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const [{ default: gsap }, { ScrambleTextPlugin }] = await Promise.all([
+      import('gsap'),
+      import('gsap/ScrambleTextPlugin'),
+    ]);
+    // The visitor may have navigated away while the engine was in flight.
+    if (token !== generation || !parts[0].isConnected) return;
+    gsap.registerPlugin(ScrambleTextPlugin);
 
     const tweens = parts.map((part, index) => gsap.to(part, {
       duration: 0.72,
@@ -135,9 +231,12 @@ const experienceUnit = isEs
     window.__aboutScrambleCleanup = () => tweens.forEach((tween) => tween.kill());
   }
 
-  document.addEventListener('astro:page-load', initializeAboutScramble);
-  document.addEventListener('astro:before-swap', () => window.__aboutScrambleCleanup?.());
-  initializeAboutScramble();
+  document.addEventListener('astro:page-load', () => void initializeAboutScramble());
+  document.addEventListener('astro:before-swap', () => {
+    generation += 1;
+    window.__aboutScrambleCleanup?.();
+  });
+  void initializeAboutScramble();
 </script>
 
 <style>
@@ -302,6 +401,34 @@ const experienceUnit = isEs
     font-weight: 400;
   }
 
+  .role-list h4 a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+    transition: color 180ms ease;
+  }
+
+  .role-list h4 a span {
+    color: var(--signal);
+    font-size: 1.1rem;
+  }
+
+  .role-list h4 a:hover {
+    color: var(--signal);
+  }
+
+  .independent-timeline {
+    padding-top: 0;
+  }
+
+  .independent-timeline .role-list li:first-child {
+    padding-top: clamp(28px, 4vw, 44px);
+  }
+
+  .independent-timeline .role-list li:last-child {
+    padding-bottom: clamp(28px, 4vw, 44px);
+  }
+
   .role-list p,
   .education-card p {
     max-width: 64ch;
@@ -344,7 +471,7 @@ const experienceUnit = isEs
     overflow: hidden;
     padding: 7px;
     border-radius: var(--radius-small);
-    background: var(--ink);
+    background: var(--image-well);
   }
 
   .education-logo img {
@@ -362,22 +489,65 @@ const experienceUnit = isEs
     color: var(--muted);
   }
 
+  /*
+   * Three documents, two page formats. Every card gets the same well, and each
+   * scan sits inside it at its own proportion, bounded by both axes: the
+   * landscape ones run wide, the portrait one runs tall, none is cropped or
+   * stretched, and the copy keeps one left edge down the shelf.
+   */
+  .certifications-timeline > article + article {
+    margin-top: 12px;
+  }
+
   .certificate-card {
     display: grid;
-    grid-template-columns: minmax(280px, 0.58fr) 1fr;
+    grid-template-columns: minmax(240px, 0.42fr) minmax(0, 1fr);
     align-items: stretch;
   }
 
   .certificate-preview {
-    min-height: 460px;
-    overflow: hidden;
-    background: var(--ink);
+    display: grid;
+    place-items: center;
+    padding: clamp(22px, 3vw, 38px);
+    background: var(--image-well);
   }
 
   .certificate-preview img {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: min(304px, 100%);
+    object-fit: contain;
+    box-shadow: 0 14px 30px rgb(11 14 8 / 0.26);
+    transition: transform 240ms var(--ease-out);
+  }
+
+  .certificate-preview:hover img,
+  .certificate-preview:focus-visible img {
+    transform: translateY(-4px);
+  }
+
+  .certificate-issuer {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+
+  .certificate-mark {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+    place-items: center;
+    padding: 4px;
+    border-radius: 8px;
+    background: var(--image-well);
+  }
+
+  .certificate-mark img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
 
   .certificate-copy {
@@ -393,7 +563,7 @@ const experienceUnit = isEs
   }
 
   .certificate-copy h3 {
-    max-width: 18ch;
+    max-width: 23ch;
     margin: 0 0 18px;
     font-family: var(--display);
     font-size: clamp(2rem, 4vw, 3.5rem);
@@ -446,9 +616,9 @@ const experienceUnit = isEs
       align-items: flex-start;
     }
 
-    .certificate-preview {
-      min-height: 0;
-      aspect-ratio: 935 / 1210;
+    .certificate-preview img {
+      width: 100%;
+      height: auto;
     }
   }
 </style>

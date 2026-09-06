@@ -1,0 +1,351 @@
+---
+import type { Locale } from '@/data/content';
+
+interface Props {
+  locale: Locale;
+  canonicalPath: string;
+  alternatePath: string;
+}
+
+const { locale, canonicalPath, alternatePath } = Astro.props;
+const isEs = locale === 'es';
+const home = isEs ? '/' : '/en/';
+
+const links = [
+  { label: isEs ? 'Inicio' : 'Home', href: home },
+  { label: isEs ? 'Sobre mí' : 'About', href: isEs ? '/sobre-mi/' : '/en/about/' },
+  { label: isEs ? 'Proyectos' : 'Projects', href: isEs ? '/proyectos/' : '/en/projects/' },
+  { label: isEs ? 'Tecnologías' : 'Technologies', href: isEs ? '/tecnologias/' : '/en/technologies/' },
+].map((link) => ({
+  ...link,
+  current: link.href === canonicalPath,
+  inSection: link.href !== home && link.href !== canonicalPath && canonicalPath.startsWith(link.href),
+}));
+
+const themeStates = [
+  {
+    mode: 'system',
+    label: isEs ? 'Auto' : 'Auto',
+    action: isEs ? ': cambiar a tema claro' : ': switch to the light theme',
+  },
+  {
+    mode: 'light',
+    label: isEs ? 'Claro' : 'Light',
+    action: isEs ? ': cambiar a tema oscuro' : ': switch to the dark theme',
+  },
+  {
+    mode: 'dark',
+    label: isEs ? 'Oscuro' : 'Dark',
+    action: isEs ? ': usar el tema del sistema' : ': follow the system theme',
+  },
+];
+---
+
+<header class="site-header" transition:name="site-header" transition:animate="none">
+  <div class="site-header-inner">
+    <a class="site-brand" href={home} aria-label={isEs ? 'camir.tech, volver al inicio' : 'camir.tech, back to home'}>
+      <span class="site-brand-bay">
+        <img src="/favicon-96x96.png" alt="" width="96" height="96" decoding="async" />
+      </span>
+      <span class="site-brand-name">camir<span class="site-brand-suffix">.tech</span></span>
+    </a>
+
+    <nav class="site-nav" aria-label={isEs ? 'Secciones del sitio' : 'Site sections'}>
+      <ul>
+        {
+          links.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                aria-current={link.current ? 'page' : undefined}
+                data-in-section={link.inSection ? '' : undefined}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="site-controls">
+      <a
+        class="site-locale"
+        href={alternatePath}
+        lang={isEs ? 'en' : 'es'}
+        hreflang={isEs ? 'en' : 'es'}
+        aria-label={isEs ? 'View this page in English' : 'Ver esta página en español'}
+      >
+        {isEs ? 'EN' : 'ES'}
+      </a>
+
+      <button class="theme-toggle" type="button" data-theme-toggle>
+        <span class="visually-hidden">{isEs ? 'Tema ' : 'Theme '}</span>
+        {
+          themeStates.map((state) => (
+            <span class="theme-state" data-mode={state.mode}>
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                {state.mode === 'system' && (
+                  <>
+                    <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6" />
+                    <path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor" />
+                  </>
+                )}
+                {state.mode === 'light' && (
+                  <>
+                    <circle cx="12" cy="12" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6" />
+                    <path
+                      d="M12 2.4v2.6M12 19v2.6M2.4 12H5M19 12h2.6M5.2 5.2l1.9 1.9M16.9 16.9l1.9 1.9M18.8 5.2l-1.9 1.9M7.1 16.9l-1.9 1.9"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                    />
+                  </>
+                )}
+                {state.mode === 'dark' && (
+                  <path
+                    d="M20 14.4A8.6 8.6 0 0 1 9.6 4a8.6 8.6 0 1 0 10.4 10.4z"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linejoin="round"
+                  />
+                )}
+              </svg>
+              <span class="theme-label">{state.label}</span><span class="visually-hidden">{state.action}</span>
+            </span>
+          ))
+        }
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    z-index: 95;
+    top: 0;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-sunken);
+  }
+
+  .site-header-inner {
+    display: flex;
+    width: var(--page);
+    align-items: stretch;
+    margin: 0 auto;
+    gap: clamp(14px, 3vw, 34px);
+    min-height: var(--header-height);
+  }
+
+  .site-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink);
+  }
+
+  .site-brand-bay {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    /* The favicon is a dark portrait silhouette with a transparent ground, so
+       it vanishes on a dark panel. --image-well stays light in both themes,
+       which is the same treatment the certificate scans and the education
+       logos get. */
+    background: var(--image-well);
+    transition: border-color 180ms ease, background 180ms ease;
+  }
+
+  .site-brand-bay img {
+    width: 22px;
+    height: 22px;
+  }
+
+  .site-brand:hover .site-brand-bay,
+  .site-brand:focus-visible .site-brand-bay {
+    border-color: var(--signal);
+  }
+
+  .site-brand-name {
+    font-family: var(--display);
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .site-brand-suffix {
+    color: var(--muted);
+  }
+
+  .site-nav {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .site-nav ul {
+    display: flex;
+    height: 100%;
+    align-items: stretch;
+    margin: 0;
+    padding: 0;
+    gap: clamp(8px, 2vw, 22px);
+    list-style: none;
+  }
+
+  .site-nav li {
+    display: flex;
+  }
+
+  /* Each label is a port on the rail; the live one is lit. */
+  .site-nav a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 2px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: color 180ms ease;
+  }
+
+  .site-nav a::after {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    background: transparent;
+    content: '';
+    transition: background 180ms ease;
+  }
+
+  .site-nav a:hover,
+  .site-nav a:focus-visible,
+  .site-nav a[data-in-section],
+  .site-nav a[aria-current='page'] {
+    color: var(--ink);
+  }
+
+  .site-nav a:hover::after,
+  .site-nav a:focus-visible::after,
+  .site-nav a[data-in-section]::after {
+    background: var(--line-strong);
+  }
+
+  .site-nav a[aria-current='page']::after {
+    background: var(--signal);
+  }
+
+  .site-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .site-locale,
+  .theme-toggle {
+    display: inline-flex;
+    height: 36px;
+    align-items: center;
+    padding: 0 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: var(--body);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: border-color 180ms ease, color 180ms ease, background 180ms ease;
+  }
+
+  .site-locale:hover,
+  .site-locale:focus-visible,
+  .theme-toggle:hover,
+  .theme-toggle:focus-visible {
+    border-color: var(--signal);
+    background: var(--panel);
+    color: var(--ink);
+  }
+
+  /* The toggle is the one control that needs JavaScript, so JavaScript reveals it. */
+  .theme-toggle {
+    display: none;
+    gap: 7px;
+  }
+
+  html[data-theme-ready] .theme-toggle {
+    display: inline-flex;
+  }
+
+  .theme-state {
+    display: none;
+    align-items: center;
+    gap: 7px;
+  }
+
+  html:not([data-theme]) .theme-state[data-mode='system'],
+  html[data-theme='light'] .theme-state[data-mode='light'],
+  html[data-theme='dark'] .theme-state[data-mode='dark'] {
+    display: inline-flex;
+  }
+
+  .theme-state svg {
+    flex: 0 0 auto;
+  }
+
+  @media (max-width: 980px) {
+    .site-nav a {
+      font-size: 0.78rem;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .site-header-inner {
+      display: grid;
+      align-items: center;
+      padding-top: 9px;
+      column-gap: 10px;
+      grid-template-areas: 'brand controls' 'nav nav';
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .site-brand {
+      grid-area: brand;
+    }
+
+    .site-controls {
+      grid-area: controls;
+    }
+
+    .site-nav {
+      overflow-x: auto;
+      grid-area: nav;
+      scrollbar-width: none;
+    }
+
+    .site-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .site-nav ul {
+      gap: 17px;
+    }
+
+    .site-nav a {
+      min-height: 46px;
+      font-size: 0.78rem;
+    }
+  }
+</style>
