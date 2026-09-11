@@ -45,3 +45,6 @@ DESIGN.md
 /favicon/
 /hero.png
 /logos/
+
+# LibreOffice lock files
+.~lock.*#
